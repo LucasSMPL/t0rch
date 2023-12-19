@@ -15,15 +15,17 @@ export async function POST(request: NextRequest) {
         const responses: ScannedIp[] = [];
 
         for (let i = start; i < end + 1; i++) {
-            const res = await client.fetch(`http://${address}.${i}/cgi-bin/summary.cgi`);
-            const data: IpScannerApiRes = await res.json();
-            console.log(data);
+            const summRes = await client.fetch(`http://${address}.${i}/cgi-bin/summary.cgi`);
+            const summData: IpScannerApiRes = await summRes.json();
+            const statsRes = await client.fetch(`http://${address}.${i}/cgi-bin/stats.cgi`);
+            const statsData: IPStats = await summRes.json();
+            console.log(summData);
             responses.push({
                 id: i,
                 ip: `${address}.${i}`,
-                miner_type: data.INFO.type,
-                uptime: data.SUMMARY.at(0)?.elapsed ?? 0,
-                hashrate: data.SUMMARY.at(0)?.rate_5s ?? 0,
+                miner_type: summData.INFO.type,
+                uptime: summData.SUMMARY.at(0)?.elapsed ?? 0,
+                hashrate: summData.SUMMARY.at(0)?.rate_5s ?? 0,
             });
         }
 
