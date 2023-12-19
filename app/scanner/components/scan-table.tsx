@@ -1,35 +1,69 @@
-"use client";
-import { ColumnDef } from "@tanstack/react-table";
-import { Badge } from "@/components/ui/badge";
+import { DataTable } from "@/components/data-table";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  ArrowDown,
-  ArrowRight,
-  ArrowUp,
-  CheckCircle2,
-  Circle,
-  HelpCircle,
-  Timer,
-  XCircle,
-} from "lucide-react";
+import { ColumnDef } from "@tanstack/react-table";
+import { useState } from "react";
 
 import { ColumnHeader } from "@/components/data-table";
-import { TodoActions } from "./scan-actions";
-interface Task {
-  id: string;
-  ip: string;
-  miner_type: string;
-  worker: string;
-  pool_1: string,
-  uptime: string;
-  hashrate: string;
-  fan_count: string,
-  hb_count: string,
-  psu_type: string,
-  controller: string,
+
+export default function ScanTable() {
+  const [tasks, setTasks] = useState([]);
+
+  const startScan = async () => {
+    try {
+      const response = await fetch("/api/api-test");
+      const data = await response.json();
+
+      console.log("API Response:", data);
+
+      if (data && data.INFO && data.INFO.type && Array.isArray(data.SUMMARY)) {
+        const minerType = data.INFO.type;
+
+        const parsedData = data.SUMMARY.map((summary: any, index: any) => ({
+          id: String(index),
+          ip: "Unknown",
+          miner_type: minerType,
+          worker: "Unknown",
+          pool_1: "Unknown",
+          uptime: `${summary.elapsed}`,
+          hashrate: `${summary.rate_avg} ${summary.rate_unit}`,
+          fan_count: "Unknown",
+          hb_count: "Unknown",
+          psu_type: "Unknown",
+          controller: "Unknown",
+        }));
+
+        setTasks(parsedData);
+      } else {
+        console.error("Expected data fields missing:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  return (
+    <div>
+      <Button onClick={startScan}>Start Scan</Button>
+      <Card>
+        <DataTable
+          title="t0rch - btc tools but better"
+          description="t0rch is in beta, launching 2024."
+          data={tasks}
+          columns={TodoColumns}
+          searchColumnId="title"
+          filters={[]}
+        />
+      </Card>
+    </div>
+  );
 }
 
-export const TodoColumns: ColumnDef<Task>[] = [
+// Temperature
+// Firmware Version
+
+export const TodoColumns: ColumnDef<ScannedIp>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -54,7 +88,7 @@ export const TodoColumns: ColumnDef<Task>[] = [
   {
     accessorKey: "id",
     header: ({ column }) => <ColumnHeader column={column} title="ID" />,
-    cell: ({ row }) => <div className="w-[25px]">{row.getValue("id")}</div>,
+    cell: ({ row }) => <div className="w-[25px]">{row.original.id}</div>,
     enableSorting: false,
     enableHiding: false,
   },
@@ -64,9 +98,7 @@ export const TodoColumns: ColumnDef<Task>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
-          <span className="truncate font-medium">
-            {row.getValue("ip")}
-          </span>
+          <span className="truncate font-medium">{row.original.ip}</span>
         </div>
       );
     },
@@ -77,13 +109,13 @@ export const TodoColumns: ColumnDef<Task>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex items-center">
-          <span>{row.getValue("miner_type")}</span>
+          <span>{row.original.miner_type}</span>
         </div>
       );
     },
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
+    //   filterFn: (row, id, value) => {
+    //     return value.includes(original.id);
+    //  },
   },
   {
     accessorKey: "worker",
@@ -91,14 +123,14 @@ export const TodoColumns: ColumnDef<Task>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex items-center">
-          <span>{row.getValue("worker")}</span>
+          <span>{row.original.worker}</span>
         </div>
       );
     },
 
-    filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id));
-    },
+    //   filterFn: (row, id, value) => {
+    //     return value.includes(original.id);
+    //  },
   },
   {
     accessorKey: "pool_1",
@@ -106,9 +138,7 @@ export const TodoColumns: ColumnDef<Task>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
-          <span className="truncate font-medium">
-          {row.getValue("pool_1")}
-          </span>
+          <span className="truncate font-medium">{row.original.pool_1}</span>
         </div>
       );
     },
@@ -119,9 +149,7 @@ export const TodoColumns: ColumnDef<Task>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
-          <span className="truncate font-medium">
-          {row.getValue("uptime")}
-          </span>
+          <span className="truncate font-medium">{row.original.uptime}</span>
         </div>
       );
     },
@@ -133,7 +161,7 @@ export const TodoColumns: ColumnDef<Task>[] = [
       return (
         <div className="flex space-x-2">
           <span className="max-w-[100px] truncate font-medium">
-          {row.getValue("hashrate")}
+            {row.original.hashrate}
           </span>
         </div>
       );
@@ -146,7 +174,7 @@ export const TodoColumns: ColumnDef<Task>[] = [
       return (
         <div className="flex space-x-2">
           <span className="max-w-[40px] truncate font-medium">
-          {row.getValue("fan_count")}
+            {row.original.fan_count}
           </span>
         </div>
       );
@@ -159,7 +187,7 @@ export const TodoColumns: ColumnDef<Task>[] = [
       return (
         <div className="flex space-x-2">
           <span className="max-w-[100px] truncate font-medium">
-          {row.getValue("hb_count")}
+            {row.original.hb_count}
           </span>
         </div>
       );
@@ -172,7 +200,7 @@ export const TodoColumns: ColumnDef<Task>[] = [
       return (
         <div className="flex space-x-2">
           <span className="max-w-[100px] truncate font-medium">
-          {row.getValue("psu_type")}
+            {row.original.psu_type}
           </span>
         </div>
       );
@@ -180,83 +208,23 @@ export const TodoColumns: ColumnDef<Task>[] = [
   },
   {
     accessorKey: "controller",
-    header: ({ column }) => <ColumnHeader column={column} title="Control Board" />,
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Control Board" />
+    ),
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
           <span className="max-w-[100px] truncate font-medium">
-          {row.getValue("controller")}
+            {row.original.controller}
           </span>
         </div>
       );
     },
   },
 
-// ACTIONS NEED BUILT FROM SCRATCH
-
-  {
-    id: "actions",
-    cell: ({ row }) => <TodoActions row={row} />,
-  },
-];
-
-const labels = [
-  {
-    value: "bug",
-    label: "Bug",
-  },
-  {
-    value: "feature",
-    label: "Feature",
-  },
-  {
-    value: "documentation",
-    label: "Documentation",
-  },
-];
-
-const statuses = [
-  {
-    value: "backlog",
-    label: "Backlog",
-    icon: HelpCircle,
-  },
-  {
-    value: "todo",
-    label: "Todo",
-    icon: Circle,
-  },
-  {
-    value: "in progress",
-    label: "In Progress",
-    icon: Timer,
-  },
-  {
-    value: "done",
-    label: "Done",
-    icon: CheckCircle2,
-  },
-  {
-    value: "canceled",
-    label: "Canceled",
-    icon: XCircle,
-  },
-];
-
-const priorities = [
-  {
-    label: "Low",
-    value: "low",
-    icon: ArrowDown,
-  },
-  {
-    label: "Medium",
-    value: "medium",
-    icon: ArrowRight,
-  },
-  {
-    label: "High",
-    value: "high",
-    icon: ArrowUp,
-  },
+  // ACTIONS NEED BUILT FROM SCRATCH
+  // {
+  //   id: "actions",
+  //   cell: ({ row }) => <TodoActions row={row} />,
+  // },
 ];

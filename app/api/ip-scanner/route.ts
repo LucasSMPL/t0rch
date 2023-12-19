@@ -1,19 +1,25 @@
-import { NextRequest, NextResponse } from 'next/server';
 import DigestClient from 'digest-fetch';
+import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
     try {
+        const { address, end, start }: {
+            address: string,
+            start: number,
+            end: number,
+        } = await request.json();
         const client = new DigestClient('root', 'root', { basic: false });
-        // const ips = ['10.0.215.1', '10.0.215.2', '10.0.215.3', '10.0.215.4', '10.0.215.5'];
+
         const responses = [];
 
-
-            const res = await client.fetch(`http://10.0.215.2/cgi-bin/summary.cgi`);
+        for (let i = start; i < end + 1; i++) {
+            const res = await client.fetch(`http://${address}.${i}/cgi-bin/summary.cgi`);
             const data = await res.json();
             console.log(data);
             responses.push(data);
+        }
 
         return NextResponse.json({
             status: 200,

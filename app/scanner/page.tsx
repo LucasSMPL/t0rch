@@ -1,6 +1,6 @@
 "use client";
-import TodoTable from "./components/todo-table/scan-table";
-import ScannerStats from "./components/todo-table/scanner-stats";
+import ScanTable from "./components/scan-table";
+import ScannerStats from "./components/scanner-stats";
 
 export default function ScannerPage() {
   return (
@@ -8,7 +8,7 @@ export default function ScannerPage() {
       <div className="pt-10" style={{ marginBottom: "40px" }}>
         <ScannerStats />
       </div>
-      <TodoTable />
+      <ScanTable />
     </div>
   );
 }
