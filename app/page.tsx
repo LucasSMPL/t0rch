@@ -1,8 +1,30 @@
+"use client";
 import Image from 'next/image'
+import React, { useEffect, useState } from 'react';
 
 export default function Home() {
+  const [apiResponse, setApiResponse] = useState('');
+
+  useEffect(() => {
+    // Function to fetch data from your API
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/api/api-test');
+        const data = await response.json();
+        setApiResponse(JSON.stringify(data, null, 2)); // Format JSON for readability
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        setApiResponse('Error fetching data');
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <main className="flex min-h-screen flex-col items-center justify-center p-24">
+      {/* Display API response */}
+      <h1>{apiResponse}</h1>
       <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
         <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
           Get started by editing&nbsp;
