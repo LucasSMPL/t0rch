@@ -129,32 +129,32 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
       );
     },
   },
-  //   {
-  //     accessorKey: "fan_count",
-  //     header: ({ column }) => <ColumnHeader column={column} title="Fans" />,
-  //     cell: ({ row }) => {
-  //       return (
-  //         <div className="flex space-x-2">
-  //           <span className="max-w-[40px] truncate font-medium">
-  //             {row.original.fan_count}
-  //           </span>
-  //         </div>
-  //       );
-  //     },
-  //   },
-  //   {
-  //     accessorKey: "hb_count",
-  //     header: ({ column }) => <ColumnHeader column={column} title="HB's" />,
-  //     cell: ({ row }) => {
-  //       return (
-  //         <div className="flex space-x-2">
-  //           <span className="max-w-[100px] truncate font-medium">
-  //             {row.original.hb_count}
-  //           </span>
-  //         </div>
-  //       );
-  //     },
-  //   },
+  {
+    accessorKey: "fan_count",
+    header: ({ column }) => <ColumnHeader column={column} title="Fans" />,
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className="max-w-[40px] truncate font-medium">
+            {row.original.fan_count}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "hb_count",
+    header: ({ column }) => <ColumnHeader column={column} title="HB's" />,
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className="max-w-[100px] truncate font-medium">
+            {row.original.hb_count}
+          </span>
+        </div>
+      );
+    },
+  },
   //   {
   //     accessorKey: "psu_type",
   //     header: ({ column }) => <ColumnHeader column={column} title="PSU" />,

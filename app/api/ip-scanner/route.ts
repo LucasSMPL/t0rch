@@ -16,9 +16,9 @@ export async function POST(request: NextRequest) {
 
         for (let i = start; i < end + 1; i++) {
             const summRes = await client.fetch(`http://${address}.${i}/cgi-bin/summary.cgi`);
-            const summData: IpScannerApiRes = await summRes.json();
+            const summData: IpSummary = await summRes.json();
             const statsRes = await client.fetch(`http://${address}.${i}/cgi-bin/stats.cgi`);
-            const statsData: IPStats = await summRes.json();
+            const statsData: IpStats = await statsRes.json();
             console.log(summData);
             responses.push({
                 id: i,
@@ -26,6 +26,8 @@ export async function POST(request: NextRequest) {
                 miner_type: summData.INFO.type,
                 uptime: summData.SUMMARY.at(0)?.elapsed ?? 0,
                 hashrate: summData.SUMMARY.at(0)?.rate_5s ?? 0,
+                fan_count: statsData.STATS.at(0)?.fan_num ?? 0,
+                hb_count: statsData.STATS.at(0)?.chain_num ?? 0,
             });
         }
 
