@@ -64,71 +64,16 @@ export async function POST(request: NextRequest) {
         const stream = new ReadableStream({
             async start(c) {
                 const encoder = new TextEncoder();
+                let allPrmises: Promise<StreamRes<ScannedIp>>[] = [];
                 for (let i = start; i <= end; i++) {
-                    try {
-                        const summRes = await client.fetch(`http://${address}.${i}/cgi-bin/summary.cgi`);
-                        const summData: IpSummary = await summRes.json();
-                        const statsRes = await client.fetch(`http://${address}.${i}/cgi-bin/stats.cgi`);
-                        const statsData: IpStats = await statsRes.json();
-                        const minerRes = await client.fetch(`http://${address}.${i}/cgi-bin/get_miner_conf.cgi`);
-                        const minerData: IpMiner = await minerRes.json();
-                        const logsRes = await client.fetch(`http://${address}.${i}/cgi-bin/log.cgi`);
-                        const logsData = await logsRes.text();
-
-                        const { controller, power_type } = parseLogData(logsData);
-
-                        const model = models.find(e => {
-                            return `${e.manufacturer!.name} ${e.model} (${e.hashrate}T)` === summData.INFO.type ||
-                                `${e.manufacturer!.name}Miner ${e.model} (${e.hashrate}T)` === summData.INFO.type ||
-                                `${e.manufacturer!.name} ${e.model} (${e.hashrate})` === summData.INFO.type ||
-                                `${e.manufacturer!.name} ${e.model}` === summData.INFO.type;
-                        });
-                        if (!model) throw Error(`Model not found: ${summData.INFO.type}`);
-
-                        const res: StreamRes<ScannedIp> = {
-                            result: {
-                                id: i,
-                                ip: `${address}.${i}`,
-                                miner_type: summData.INFO.type,
-                                // uptime: intervalToDuration({start: 0, end: summData.SUMMARY.at(0)?.elapsed ?? 0}),
-                                uptime: summData.SUMMARY.at(0)?.elapsed ?? 0,
-                                hashrate: (summData.SUMMARY.at(0)?.rate_5s ?? 0) / 1000,
-                                fan_count: statsData.STATS.at(0)?.fan_num ?? 0,
-                                hb_count: statsData.STATS.at(0)?.chain_num ?? 0,
-                                worker: minerData.pools[0].user ?? "",
-                                controller,
-                                power_type,
-                                is_underhashing: (summData.SUMMARY.at(0)?.rate_5s ?? 0 / 1000) < (model.hashrate! * 0.8),
-                            },
-                            total: end - start + 1,
-                            done: i,
-                        };
-
-                        const queue = encoder.encode(JSON.stringify(res));
-                        c.enqueue(queue);
-                    } catch (error) {
-                        console.error(`Error fetching data for IP ${address}.${i}:`, error);
-                        const res: StreamRes<ScannedIp> = {
-                            result: {
-                                id: i,
-                                ip: `${address}.${i}`,
-                                miner_type: "N/A",
-                                uptime: 0,
-                                hashrate: 0,
-                                fan_count: 0,
-                                hb_count: 0,
-                                worker: "N/A",
-                                controller: "N/A",
-                                power_type: "N/A",
-                                is_underhashing: false,
-                            },
-                            total: end - start + 1,
-                            done: i,
-                        };
-                        const queue = encoder.encode(JSON.stringify(res));
-                        c.enqueue(queue);
-                    }
+                    allPrmises.push(getIpMetadata(client, address, i, models, end - start + 1));
                 }
+                await Promise.allSettled(allPrmises).then((results) =>
+                    results.forEach((result) => {
+                        const queue = encoder.encode(JSON.stringify(result));
+                        c.enqueue(queue);
+                    }),
+                );
                 c.close();
             },
         });
@@ -141,3 +86,78 @@ export async function POST(request: NextRequest) {
         });
     }
 }
+
+async function getIpMetadata(client: DigestClient, address: string, i: number, models: Models, total: number) {
+    try {
+        const summRes = await client.fetch(`http://${address}.${i}/cgi-bin/summary.cgi`);
+        const summData: IpSummary = await summRes.json();
+        const statsRes = await client.fetch(`http://${address}.${i}/cgi-bin/stats.cgi`);
+        const statsData: IpStats = await statsRes.json();
+        const minerRes = await client.fetch(`http://${address}.${i}/cgi-bin/get_miner_conf.cgi`);
+        const minerData: IpMiner = await minerRes.json();
+        const logsRes = await client.fetch(`http://${address}.${i}/cgi-bin/log.cgi`);
+        const logsData = await logsRes.text();
+
+        const { controller, power_type } = parseLogData(logsData);
+
+        const model = models.find(e => {
+            return `${e.manufacturer!.name} ${e.model} (${e.hashrate}T)` === summData.INFO.type ||
+                `${e.manufacturer!.name}Miner ${e.model} (${e.hashrate}T)` === summData.INFO.type ||
+                `${e.manufacturer!.name} ${e.model} (${e.hashrate})` === summData.INFO.type ||
+                `${e.manufacturer!.name} ${e.model}` === summData.INFO.type;
+        });
+        if (!model) throw Error(`Model not found: ${summData.INFO.type}`);
+
+        const res: StreamRes<ScannedIp> = {
+            result: {
+                id: i,
+                ip: `${address}.${i}`,
+                miner_type: summData.INFO.type,
+                // uptime: intervalToDuration({start: 0, end: summData.SUMMARY.at(0)?.elapsed ?? 0}),
+                uptime: summData.SUMMARY.at(0)?.elapsed ?? 0,
+                hashrate: (summData.SUMMARY.at(0)?.rate_5s ?? 0) / 1000,
+                fan_count: statsData.STATS.at(0)?.fan_num ?? 0,
+                hb_count: statsData.STATS.at(0)?.chain_num ?? 0,
+                worker: minerData.pools[0].user ?? "",
+                controller,
+                power_type,
+                is_underhashing: (summData.SUMMARY.at(0)?.rate_5s ?? 0 / 1000) < (model.hashrate! * 0.8),
+            },
+            total,
+            done: i,
+        };
+        return res;
+    } catch (error) {
+        console.error(`Error fetching data for IP ${address}.${i}:`, error);
+        const res: StreamRes<ScannedIp> = {
+            result: {
+                id: i,
+                ip: `${address}.${i}`,
+                miner_type: "N/A",
+                uptime: 0,
+                hashrate: 0,
+                fan_count: 0,
+                hb_count: 0,
+                worker: "N/A",
+                controller: "N/A",
+                power_type: "N/A",
+                is_underhashing: false,
+            },
+            total,
+            done: i,
+        };
+        return res;
+    }
+}
+
+type Models = {
+    hashrate: number | null;
+    id: number;
+    id_manufacturer: number | null;
+    model: string;
+    power: number | null;
+    manufacturer: {
+        id: number;
+        name: string;
+    } | null;
+}[]

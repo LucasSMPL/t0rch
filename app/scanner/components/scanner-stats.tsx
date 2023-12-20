@@ -7,10 +7,12 @@ export default function ScanStats({
   onScan,
   scanCount,
   underhashingCount,
+  lessThan3Count,
 }: {
   onScan: () => void;
   scanCount: number;
   underhashingCount: number;
+  lessThan3Count: number;
 }) {
   return (
     <div>
@@ -61,7 +63,9 @@ export default function ScanStats({
             <HelpCircle />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">X</div>
+            <div className="text-2xl font-bold text-orange-600">
+              {lessThan3Count}
+            </div>
           </CardContent>
         </Card>
         <Card>
