@@ -115,6 +115,7 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
     accessorKey: "uptime",
     header: ({ column }) => <ColumnHeader column={column} title="Uptime" />,
     cell: ({ row }) => {
+      console.log(row.original.uptime)
       return (
         <div className="flex space-x-2">
           <span className="truncate font-medium">

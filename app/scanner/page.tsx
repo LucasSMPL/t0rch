@@ -11,7 +11,7 @@ export default function ScannerPage() {
   const startScan = async () => {
     try {
       setProgress(0);
-      const response = await fetch(`/api/stream-test`, { method: "GET" });
+      const response = await fetch(`/api/ip-scanner`, { method: "POST", body: JSON.stringify({ address: "10.0.115", start: 1, end: 100 }) });
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       while (true && reader != null) {
@@ -21,13 +21,6 @@ export default function ScannerPage() {
         setIps((prev) => [...prev, decoded.result]);
         setProgress((decoded.done / decoded.total) * 100);
       }
-      const res = await axios.post<ScannedIp[]>("/api/ip-scanner", {
-        address: "10.0.123",
-        start: 75,
-        end: 95,
-      });
-      console.log(res.data);
-      setIps(res.data);
     } catch (error) {
       console.error("Error during scan:", error);
     } finally {
