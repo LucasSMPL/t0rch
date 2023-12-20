@@ -133,7 +133,8 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
       return (
         <div className="flex space-x-2">
           <span className="truncate font-medium">
-            {getSiPrefixedNumber(row.original.hashrate)}H
+            {/* {getSiPrefixedNumber(row.original.hashrate)}TH */}
+            {row.original.hashrate.toFixed(2)} TH
           </span>
         </div>
       );
@@ -184,6 +185,21 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
         <div className="flex space-x-2">
           <span className="truncate font-medium">
             {row.original.controller}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "is_underhashing",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Underhashing" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className="truncate font-medium">
+            {row.original.is_underhashing? "Yes" : "No"}
           </span>
         </div>
       );

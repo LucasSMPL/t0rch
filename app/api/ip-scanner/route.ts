@@ -88,13 +88,13 @@ export async function POST(request: NextRequest) {
                     miner_type: summData.INFO.type,
                     // uptime: intervalToDuration({start: 0, end: summData.SUMMARY.at(0)?.elapsed ?? 0}),
                     uptime: summData.SUMMARY.at(0)?.elapsed ?? 0,
-                    hashrate: summData.SUMMARY.at(0)?.rate_5s ?? 0,
+                    hashrate: (summData.SUMMARY.at(0)?.rate_5s ?? 0) / 1000,
                     fan_count: statsData.STATS.at(0)?.fan_num ?? 0,
                     hb_count: statsData.STATS.at(0)?.chain_num ?? 0,
                     worker: minerData.pools[0].user ?? "",
                     controller,
                     power_type,
-                    is_underhashing: (summData.SUMMARY.at(0)?.rate_5s ?? 0) < (model.hashrate! * 0.8 * 10 ** 12),
+                    is_underhashing: (summData.SUMMARY.at(0)?.rate_5s ?? 0 / 1000) < (model.hashrate! * 0.8),
                 });
             } catch (error) {
                 console.error(`Error fetching data for IP ${address}.${i}:`, error);
