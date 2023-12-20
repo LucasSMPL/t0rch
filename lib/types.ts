@@ -13,6 +13,12 @@ type ScannedIp = {
     is_underhashing: boolean,
 }
 
+type StreamRes<T> = {
+    result: T,
+    total: number,
+    done: number,
+}
+
 type IpSummary = {
     STATUS: {
         STATUS: string,

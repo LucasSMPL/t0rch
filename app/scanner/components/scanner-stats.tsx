@@ -3,7 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowBigDownDash, Flame, HelpCircle, Radar } from "lucide-react";
 
-export default function ScanStats({ onScan, scanCount }: { onScan: () => void, scanCount: number }) {
+export default function ScanStats({
+  onScan,
+  scanCount,
+  underhashingCount,
+}: {
+  onScan: () => void;
+  scanCount: number;
+  underhashingCount: number;
+}) {
   return (
     <div>
       <div className="flex items-center justify-between p-4">
@@ -27,7 +35,9 @@ export default function ScanStats({ onScan, scanCount }: { onScan: () => void, s
             <Radar />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{scanCount}</div>
+            <div className="text-2xl font-bold text-orange-600">
+              {scanCount}
+            </div>
           </CardContent>
         </Card>
         <Card>
@@ -38,7 +48,9 @@ export default function ScanStats({ onScan, scanCount }: { onScan: () => void, s
             <ArrowBigDownDash />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">X</div>
+            <div className="text-2xl font-bold text-orange-600">
+              {underhashingCount}
+            </div>
           </CardContent>
         </Card>
         <Card>
