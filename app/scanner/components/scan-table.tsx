@@ -1,10 +1,10 @@
-import { DataTable } from "@/components/data-table";
+import { ColumnHeader, DataTable } from "@/components/data-table";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { getSiPrefixedNumber } from "@/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
+import { formatDistance } from "date-fns";
 import { useMemo } from "react";
-
-import { ColumnHeader } from "@/components/data-table";
 
 export default function ScanTable({ scannedIps }: { scannedIps: ScannedIp[] }) {
   const ips = useMemo(() => scannedIps, [scannedIps]);
@@ -60,7 +60,11 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
-          <a href={`http://${row.original.ip}`} target="_blank" className="truncate font-medium">
+          <a
+            href={`http://${row.original.ip}`}
+            target="_blank"
+            className="truncate font-medium"
+          >
             {row.original.ip}
           </a>
         </div>
@@ -81,39 +85,43 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
     //     return value.includes(original.id);
     //  },
   },
-    {
-      accessorKey: "worker",
-      header: ({ column }) => <ColumnHeader column={column} title="Worker" />,
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center">
-            <span>{row.original.worker}</span>
-          </div>
-        );
-      },
-
-      //   filterFn: (row, id, value) => {
-      //     return value.includes(original.id);
-      //  },
+  {
+    accessorKey: "worker",
+    header: ({ column }) => <ColumnHeader column={column} title="Worker" />,
+    cell: ({ row }) => {
+      return (
+        <div className="flex items-center">
+          <span>{row.original.worker}</span>
+        </div>
+      );
     },
-    // {
-    //   accessorKey: "pool_1",
-    //   header: ({ column }) => <ColumnHeader column={column} title="Pool" />,
-    //   cell: ({ row }) => {
-    //     return (
-    //       <div className="flex space-x-2">
-    //         <span className="truncate font-medium">{row.original.pool_1}</span>
-    //       </div>
-    //     );
-    //   },
-    // },
+
+    //   filterFn: (row, id, value) => {
+    //     return value.includes(original.id);
+    //  },
+  },
+  // {
+  //   accessorKey: "pool_1",
+  //   header: ({ column }) => <ColumnHeader column={column} title="Pool" />,
+  //   cell: ({ row }) => {
+  //     return (
+  //       <div className="flex space-x-2">
+  //         <span className="truncate font-medium">{row.original.pool_1}</span>
+  //       </div>
+  //     );
+  //   },
+  // },
   {
     accessorKey: "uptime",
     header: ({ column }) => <ColumnHeader column={column} title="Uptime" />,
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
-          <span className="truncate font-medium">{row.original.uptime}</span>
+          <span className="truncate font-medium">
+            {formatDistance(0, row.original.uptime * 1000, {
+              includeSeconds: true,
+            })}
+          </span>
         </div>
       );
     },
@@ -125,7 +133,7 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
       return (
         <div className="flex space-x-2">
           <span className="truncate font-medium">
-            {row.original.hashrate}
+            {getSiPrefixedNumber(row.original.hashrate)}H
           </span>
         </div>
       );
@@ -137,9 +145,7 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
-          <span className="truncate font-medium">
-            {row.original.fan_count}
-          </span>
+          <span className="truncate font-medium">{row.original.fan_count}</span>
         </div>
       );
     },
@@ -150,41 +156,39 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
+          <span className="truncate font-medium">{row.original.hb_count}</span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "psu_type",
+    header: ({ column }) => <ColumnHeader column={column} title="PSU" />,
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
           <span className="truncate font-medium">
-            {row.original.hb_count}
+            {row.original.power_type}
           </span>
         </div>
       );
     },
   },
-    {
-      accessorKey: "psu_type",
-      header: ({ column }) => <ColumnHeader column={column} title="PSU" />,
-      cell: ({ row }) => {
-        return (
-          <div className="flex space-x-2">
-            <span className="truncate font-medium">
-              {row.original.power_type}
-            </span>
-          </div>
-        );
-      },
+  {
+    accessorKey: "controller",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="Control Board" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className="truncate font-medium">
+            {row.original.controller}
+          </span>
+        </div>
+      );
     },
-    {
-      accessorKey: "controller",
-      header: ({ column }) => (
-        <ColumnHeader column={column} title="Control Board" />
-      ),
-      cell: ({ row }) => {
-        return (
-          <div className="flex space-x-2">
-            <span className="truncate font-medium">
-              {row.original.controller}
-            </span>
-          </div>
-        );
-      },
-    },
+  },
 
   // ACTIONS NEED BUILT FROM SCRATCH
   // {

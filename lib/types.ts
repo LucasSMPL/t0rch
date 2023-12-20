@@ -10,6 +10,7 @@ type ScannedIp = {
     hb_count: number,
     power_type: string,
     controller: string,
+    is_underhashing: boolean,
 }
 
 type IpSummary = {
@@ -91,34 +92,34 @@ type IpStats = {
     ]
 }
 type IpMiner = {
-        "pools": [
-            {
-                url: string,
-                user: string,
-                pass: string,
-            },
-            {
-                url: string,
-                user: string,
-                pass: string,
-            },
-            {
-                url: string,
-                user: string,
-                pass: string,
-            }
-        ],
-        "api-listen": boolean,
-        "api-network": boolean,
-        "api-groups": string,
-        "api-allow": string,
-        "bitmain-fan-ctrl": boolean,
-        "bitmain-fan-pwm": string,
-        "bitmain-use-vil": boolean,
-        "bitmain-freq": string,
-        "bitmain-voltage": string,
-        "bitmain-ccdelay": string,
-        "bitmain-pwth": string,
-        "bitmain-work-mode": string,
-        "bitmain-freq-level": string
+    "pools": [
+        {
+            url: string,
+            user: string,
+            pass: string,
+        },
+        {
+            url: string,
+            user: string,
+            pass: string,
+        },
+        {
+            url: string,
+            user: string,
+            pass: string,
+        }
+    ],
+    "api-listen": boolean,
+    "api-network": boolean,
+    "api-groups": string,
+    "api-allow": string,
+    "bitmain-fan-ctrl": boolean,
+    "bitmain-fan-pwm": string,
+    "bitmain-use-vil": boolean,
+    "bitmain-freq": string,
+    "bitmain-voltage": string,
+    "bitmain-ccdelay": string,
+    "bitmain-pwth": string,
+    "bitmain-work-mode": string,
+    "bitmain-freq-level": string
 }
