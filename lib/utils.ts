@@ -26,3 +26,5 @@ export const getSiPrefixedNumber = (number: number): string => {
   const baseNumber = parseFloat((number / Math.pow(10, siBase * EXP_STEP_SIZE)).toFixed(2));
   return `${baseNumber}${prefix}`;
 };
+
+export const ipRangeStr = (r: IpRange) => `${r.label} - (${r.address}.${r.start} -> ${r.address}.${r.end})`;

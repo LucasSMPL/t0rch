@@ -12,7 +12,12 @@ type ScannedIp = {
     controller: string,
     is_underhashing: boolean,
 }
-
+type IpRange = {
+    label: string;
+    address: string;
+    start: number;
+    end: number;
+};
 type StreamRes<T> = {
     result: T,
     total: number,
