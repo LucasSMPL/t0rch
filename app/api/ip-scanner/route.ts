@@ -64,16 +64,11 @@ export async function POST(request: NextRequest) {
         const stream = new ReadableStream({
             async start(c) {
                 const encoder = new TextEncoder();
-                let allPrmises: Promise<StreamRes<ScannedIp>>[] = [];
+                let allPrmises: Promise<void>[] = [];
                 for (let i = start; i <= end; i++) {
-                    allPrmises.push(getIpMetadata(client, address, i, models, end - start + 1));
+                    allPrmises.push(getIpMetadata(c, encoder, client, address, i, models, end - start + 1));
                 }
-                await Promise.allSettled(allPrmises).then((results) =>
-                    results.forEach((result) => {
-                        const queue = encoder.encode(JSON.stringify(result));
-                        c.enqueue(queue);
-                    }),
-                );
+                await Promise.allSettled(allPrmises);
                 c.close();
             },
         });
@@ -87,7 +82,15 @@ export async function POST(request: NextRequest) {
     }
 }
 
-async function getIpMetadata(client: DigestClient, address: string, i: number, models: Models, total: number) {
+async function getIpMetadata(
+    c: ReadableStreamDefaultController,
+    encoder: TextEncoder,
+    client: DigestClient,
+    address: string,
+    i: number,
+    models: Models,
+    total: number,
+): Promise<void> {
     try {
         const summRes = await client.fetch(`http://${address}.${i}/cgi-bin/summary.cgi`);
         const summData: IpSummary = await summRes.json();
@@ -126,7 +129,9 @@ async function getIpMetadata(client: DigestClient, address: string, i: number, m
             total,
             done: i,
         };
-        return res;
+        const queue = encoder.encode(JSON.stringify(res));
+        c.enqueue(queue);
+
     } catch (error) {
         console.error(`Error fetching data for IP ${address}.${i}:`, error);
         const res: StreamRes<ScannedIp> = {
@@ -146,7 +151,8 @@ async function getIpMetadata(client: DigestClient, address: string, i: number, m
             total,
             done: i,
         };
-        return res;
+        const queue = encoder.encode(JSON.stringify(res));
+        c.enqueue(queue);
     }
 }
 
