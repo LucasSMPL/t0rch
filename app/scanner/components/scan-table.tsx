@@ -16,7 +16,7 @@ export default function ScanTable({ scannedIps }: { scannedIps: ScannedIp[] }) {
         description="t0rch is in beta, launching 2024."
         data={ips}
         columns={TodoColumns}
-        searchColumnId="ip"
+        searchColumnId="worker"
       />
     </Card>
   );
@@ -50,7 +50,7 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
   {
     accessorKey: "id",
     header: ({ column }) => <ColumnHeader column={column} title="ID" />,
-    cell: ({ row }) => <div className="w-[25px]">{row.original.id}</div>,
+    cell: ({ row }) => <div>{row.original.id}</div>,
     enableSorting: false,
     enableHiding: false,
   },
@@ -60,7 +60,9 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
-          <span className="truncate font-medium">{row.original.ip}</span>
+          <a href={`http://${row.original.ip}`} target="_blank" className="truncate font-medium">
+            {row.original.ip}
+          </a>
         </div>
       );
     },
@@ -79,32 +81,32 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
     //     return value.includes(original.id);
     //  },
   },
-  //   {
-  //     accessorKey: "worker",
-  //     header: ({ column }) => <ColumnHeader column={column} title="Worker" />,
-  //     cell: ({ row }) => {
-  //       return (
-  //         <div className="flex items-center">
-  //           <span>{row.original.worker}</span>
-  //         </div>
-  //       );
-  //     },
+    {
+      accessorKey: "worker",
+      header: ({ column }) => <ColumnHeader column={column} title="Worker" />,
+      cell: ({ row }) => {
+        return (
+          <div className="flex items-center">
+            <span>{row.original.worker}</span>
+          </div>
+        );
+      },
 
-  //     //   filterFn: (row, id, value) => {
-  //     //     return value.includes(original.id);
-  //     //  },
-  //   },
-  //   {
-  //     accessorKey: "pool_1",
-  //     header: ({ column }) => <ColumnHeader column={column} title="Pool" />,
-  //     cell: ({ row }) => {
-  //       return (
-  //         <div className="flex space-x-2">
-  //           <span className="truncate font-medium">{row.original.pool_1}</span>
-  //         </div>
-  //       );
-  //     },
-  //   },
+      //   filterFn: (row, id, value) => {
+      //     return value.includes(original.id);
+      //  },
+    },
+    // {
+    //   accessorKey: "pool_1",
+    //   header: ({ column }) => <ColumnHeader column={column} title="Pool" />,
+    //   cell: ({ row }) => {
+    //     return (
+    //       <div className="flex space-x-2">
+    //         <span className="truncate font-medium">{row.original.pool_1}</span>
+    //       </div>
+    //     );
+    //   },
+    // },
   {
     accessorKey: "uptime",
     header: ({ column }) => <ColumnHeader column={column} title="Uptime" />,
@@ -122,7 +124,7 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
-          <span className="max-w-[100px] truncate font-medium">
+          <span className="truncate font-medium">
             {row.original.hashrate}
           </span>
         </div>
@@ -135,7 +137,7 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
-          <span className="max-w-[40px] truncate font-medium">
+          <span className="truncate font-medium">
             {row.original.fan_count}
           </span>
         </div>
@@ -148,41 +150,41 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
-          <span className="max-w-[100px] truncate font-medium">
+          <span className="truncate font-medium">
             {row.original.hb_count}
           </span>
         </div>
       );
     },
   },
-  //   {
-  //     accessorKey: "psu_type",
-  //     header: ({ column }) => <ColumnHeader column={column} title="PSU" />,
-  //     cell: ({ row }) => {
-  //       return (
-  //         <div className="flex space-x-2">
-  //           <span className="max-w-[100px] truncate font-medium">
-  //             {row.original.psu_type}
-  //           </span>
-  //         </div>
-  //       );
-  //     },
-  //   },
-  //   {
-  //     accessorKey: "controller",
-  //     header: ({ column }) => (
-  //       <ColumnHeader column={column} title="Control Board" />
-  //     ),
-  //     cell: ({ row }) => {
-  //       return (
-  //         <div className="flex space-x-2">
-  //           <span className="max-w-[100px] truncate font-medium">
-  //             {row.original.controller}
-  //           </span>
-  //         </div>
-  //       );
-  //     },
-  //   },
+    {
+      accessorKey: "psu_type",
+      header: ({ column }) => <ColumnHeader column={column} title="PSU" />,
+      cell: ({ row }) => {
+        return (
+          <div className="flex space-x-2">
+            <span className="truncate font-medium">
+              {row.original.power_type}
+            </span>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "controller",
+      header: ({ column }) => (
+        <ColumnHeader column={column} title="Control Board" />
+      ),
+      cell: ({ row }) => {
+        return (
+          <div className="flex space-x-2">
+            <span className="truncate font-medium">
+              {row.original.controller}
+            </span>
+          </div>
+        );
+      },
+    },
 
   // ACTIONS NEED BUILT FROM SCRATCH
   // {

@@ -2,14 +2,14 @@ type ScannedIp = {
     id: number,
     ip: string,
     miner_type: string,
-    // worker: string,
+    worker: string,
     // pool_1: string,
     uptime: number,
     hashrate: number,
     fan_count: number,
     hb_count: number,
-    // psu_type: string,
-    // controller: string,
+    power_type: string,
+    controller: string,
 }
 
 type IpSummary = {
@@ -89,4 +89,36 @@ type IpStats = {
 
         }
     ]
+}
+type IpMiner = {
+        "pools": [
+            {
+                url: string,
+                user: string,
+                pass: string,
+            },
+            {
+                url: string,
+                user: string,
+                pass: string,
+            },
+            {
+                url: string,
+                user: string,
+                pass: string,
+            }
+        ],
+        "api-listen": boolean,
+        "api-network": boolean,
+        "api-groups": string,
+        "api-allow": string,
+        "bitmain-fan-ctrl": boolean,
+        "bitmain-fan-pwm": string,
+        "bitmain-use-vil": boolean,
+        "bitmain-freq": string,
+        "bitmain-voltage": string,
+        "bitmain-ccdelay": string,
+        "bitmain-pwth": string,
+        "bitmain-work-mode": string,
+        "bitmain-freq-level": string
 }

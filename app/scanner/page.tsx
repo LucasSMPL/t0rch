@@ -9,9 +9,9 @@ export default function ScannerPage() {
   const startScan = async () => {
     try {
       const res = await axios.post<ScannedIp[]>("/api/ip-scanner", {
-        address: "10.0.215",
+        address: "10.0.115",
         start: 1,
-        end: 5,
+        end: 10,
       });
       console.log(res.data);
       setIps(res.data);
@@ -20,9 +20,9 @@ export default function ScannerPage() {
     }
   };
   return (
-    <div>
-      <div className="pt-10" style={{ marginBottom: "40px" }}>
-        <ScannerStats onScan={startScan} />
+    <div style={{ marginLeft: "40px", marginRight: "40px" }}>
+      <div className="pt-10" style={{ marginBottom: "20px" }}>
+        <ScannerStats onScan={startScan} scanCount={ips.length}/>
       </div>
       <ScanTable scannedIps={ips} />
     </div>
