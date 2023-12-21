@@ -4,6 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { getSiPrefixedNumber } from "@/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { formatDistance } from "date-fns";
+import { Filter } from "lucide-react";
 import { useMemo } from "react";
 
 export default function ScanTable({ scannedIps }: { scannedIps: ScannedIp[] }) {
@@ -154,7 +155,12 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
   },
   {
     accessorKey: "hb_count",
-    header: ({ column }) => <ColumnHeader column={column} title="HB's" />,
+    header: ({ column }) => (
+      <div className="flex items-center">
+        <ColumnHeader column={column} title="HB's" />
+        <Filter className="" />
+      </div>
+    ),
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">

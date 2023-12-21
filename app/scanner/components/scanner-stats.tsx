@@ -93,7 +93,7 @@ export default function ScanStats({
           <div className="flex flex-row justify-end">
             <Sheet>
               <SheetTrigger>
-                <Button>Configure Network</Button>
+                <Button style={{ marginRight: '25px' }}>Configure Network</Button>
               </SheetTrigger>
               <SheetContent className="min-w-[600px] sm:w-[540px]">
                 <SheetHeader className="flex flex-row justify-between m-4">
@@ -109,7 +109,7 @@ export default function ScanStats({
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-md">
                       <DialogHeader>
-                        <DialogTitle>Add a new custom range</DialogTitle>
+                        <DialogTitle>Add A New Custom IP Range</DialogTitle>
                       </DialogHeader>
                       <div className="flex flex-col items-center space-y-4 w-full">
                         <div className="w-full gap-2">
@@ -117,24 +117,24 @@ export default function ScanStats({
                           <Input
                             id="name"
                             ref={nameRef}
-                            placeholder="Choose a name"
+                            placeholder="Choose a name for the range. (e.g Pod 69)"
                           />
                         </div>
                         <div className="w-full gap-2">
-                          <Label htmlFor="address">Address</Label>
+                          <Label htmlFor="address">Address Prefix</Label>
                           <Input
                             id="address"
                             ref={addressRef}
                             onChange={onAddressInput}
-                            placeholder="XX.X.XXX"
+                            placeholder="XX.X.XXX (10.0.169)"
                           />
                         </div>
                         <div className="w-full gap-2">
-                          <Label htmlFor="start">Start</Label>
+                          <Label htmlFor="start">Starting IP</Label>
                           <Input id="start" ref={startRef} placeholder="1" />
                         </div>
                         <div className="w-full gap-2">
-                          <Label htmlFor="end">End</Label>
+                          <Label htmlFor="end">Ending IP</Label>
                           <Input id="end" ref={endRef} placeholder="99" />
                         </div>
                       </div>
@@ -148,7 +148,7 @@ export default function ScanStats({
                               addressRef.current?.value === ""
                             ) {
                               return toast({
-                                title: "Please choose a name",
+                                title: "Please choose a name for the range.",
                                 variant: "destructive",
                               });
                             }
@@ -156,7 +156,7 @@ export default function ScanStats({
                               !isValidFormat(addressRef.current?.value ?? "")
                             ) {
                               return toast({
-                                title: "Invalid Address",
+                                title: "Invalid Address!",
                                 variant: "destructive",
                               });
                             }
@@ -168,7 +168,7 @@ export default function ScanStats({
                                 .success
                             ) {
                               return toast({
-                                title: "Invalid Start",
+                                title: "Invalid Start IP",
                                 variant: "destructive",
                               });
                             }
@@ -179,7 +179,7 @@ export default function ScanStats({
                                 .safeParse(endRef.current?.value ?? "").success
                             ) {
                               return toast({
-                                title: "Invalid End",
+                                title: "Invalid End IP",
                                 variant: "destructive",
                               });
                             }
@@ -202,14 +202,14 @@ export default function ScanStats({
                             );
                             if (hasDuplicate) {
                               return toast({
-                                title: "Custom Range already exists",
+                                title: "Range already exists!",
                                 variant: "destructive",
                               });
                             }
                             saveCustomRanges((prev) => [...prev, newRange]);
                             setOpen(false);
                             toast({
-                              title: "Custom Range added successfully",
+                              title: "Custom Range Added Successfully!",
                               variant: "default",
                             });
                           }}
@@ -223,7 +223,7 @@ export default function ScanStats({
                 <Collapsible className="min-w-[350px] space-y-2">
                   <div className="flex items-center justify-between space-x-4 px-4">
                     <h4 className="text-sm font-semibold">
-                      Pre-defined ({ipRanges.length})
+                      Pre-defined for CFU ({ipRanges.length})
                     </h4>
                     <CollapsibleTrigger asChild>
                       <Button variant="ghost" size="sm" className="w-9 p-0">
@@ -280,7 +280,7 @@ export default function ScanStats({
                 </Collapsible>
               </SheetContent>
             </Sheet>
-            <Button onClick={onScan}>Scan Network</Button>
+            <Button style={{ backgroundColor: "#e94d1b" }} onClick={onScan}>Scan Network</Button>
           </div>
           <p className="font-mono text-xs">
             {range ? `Selected: ${ipRangeStr(range)}` : "Range Not Selected"}
@@ -336,7 +336,7 @@ export default function ScanStats({
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">
-              X <Button>filter</Button>
+              X
             </div>
           </CardContent>
         </Card>
