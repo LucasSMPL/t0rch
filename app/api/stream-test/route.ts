@@ -1,18 +1,31 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextApiResponse } from 'next';
+import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: NextRequest) {
+export async function GET(response: NextApiResponse) {
     const stream = new ReadableStream({
         async start(controller) {
             const encoder = new TextEncoder();
-            for (let i = 1; i <= 100; i++) {
-                await new Promise(r => setTimeout(r, 1000)); // To emulate a delay
-                const queue = encoder.encode(JSON.stringify({ result: i }));
-                controller.enqueue(queue);
+            let promises = [];
+            for (let i = 1; i <= 10; i++) {
+                promises.push(test(i, encoder, controller));
             }
+            await Promise.allSettled(promises);
+
             controller.close();
         },
     });
+
     return new NextResponse(stream);
+}
+
+async function test(i: number, encoder: TextEncoder, controller: ReadableStreamDefaultController) {
+    await new Promise(r => setTimeout(r, Math.random() * 1000)).then(() => {
+        const result = { result: i };
+        console.log(result);
+
+        const queue = encoder.encode(JSON.stringify(result));
+        controller.enqueue(queue);
+    });
 }

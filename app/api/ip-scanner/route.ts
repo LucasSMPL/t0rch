@@ -64,11 +64,9 @@ export async function POST(request: NextRequest) {
         const stream = new ReadableStream({
             async start(c) {
                 const encoder = new TextEncoder();
-                let allPrmises: Promise<void>[] = [];
                 for (let i = start; i <= end; i++) {
-                    allPrmises.push(getIpMetadata(c, encoder, client, address, i, models, end - start + 1));
+                    await getIpMetadata(c, encoder, client, address, i, models, end - start + 1);
                 }
-                await Promise.allSettled(allPrmises);
                 c.close();
             },
         });
