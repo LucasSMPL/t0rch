@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Collapsible,
   CollapsibleContent,
@@ -25,8 +26,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useToast } from "@/components/ui/use-toast";
+import useLocalStorage from "@/hooks/use-local-storage";
 import { cn, ipRangeStr } from "@/lib/utils";
-import { useLocalStorage } from "@uidotdev/usehooks";
+import { CheckedState } from "@radix-ui/react-checkbox";
 import {
   ArrowBigDownDash,
   ChevronsUpDown,
@@ -34,7 +36,7 @@ import {
   HelpCircle,
   Radar,
 } from "lucide-react";
-import { ChangeEvent, Dispatch, SetStateAction, useRef, useState } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 import { z } from "zod";
 
 export default function ScanStats({
@@ -42,15 +44,11 @@ export default function ScanStats({
   scanCount,
   underhashingCount,
   lessThan3Count,
-  range,
-  setRange,
 }: {
   onScan: () => void;
   scanCount: number;
   underhashingCount: number;
   lessThan3Count: number;
-  range: IpRange | undefined;
-  setRange: Dispatch<SetStateAction<IpRange | undefined>>;
 }) {
   const nameRef = useRef<HTMLInputElement | null>(null);
   const addressRef = useRef<HTMLInputElement | null>(null);
@@ -61,6 +59,10 @@ export default function ScanStats({
 
   const [customRanges, saveCustomRanges] = useLocalStorage<IpRange[]>(
     "custom-ranges",
+    []
+  );
+  const [selectedRanges, saveSelectedRanges] = useLocalStorage<IpRange[]>(
+    "selected-ranges",
     []
   );
 
@@ -82,6 +84,47 @@ export default function ScanStats({
     return regex.test(input);
   }
 
+  function areAllDefaultSelected(): boolean {
+    if (!selectedRanges.length) return false;
+    for (const r of ipRanges) {
+      const isSelected = selectedRanges.find(
+        (e) => ipRangeStr(e) === ipRangeStr(r)
+      );
+      if (!isSelected) {
+        return false;
+      }
+    }
+    return true;
+  }
+  function areAllCustomSelected(): boolean {
+    if (!selectedRanges.length) return false;
+    for (const r of customRanges) {
+      const isSelected = selectedRanges.find(
+        (e) => ipRangeStr(e) === ipRangeStr(r)
+      );
+      if (!isSelected) {
+        return false;
+      }
+    }
+    return true;
+  }
+  function toggleDefault(isChecked: CheckedState): void {
+    saveSelectedRanges((prev) => [
+      ...prev.filter(
+        (r) => !ipRanges.find((e) => ipRangeStr(e) === ipRangeStr(r))
+      ),
+      ...(isChecked ? ipRanges : []),
+    ]);
+  }
+  function toggleCustom(isChecked: CheckedState): void {
+    saveSelectedRanges((prev) => [
+      ...prev.filter(
+        (r) => !customRanges.find((e) => ipRangeStr(e) === ipRangeStr(r))
+      ),
+      ...(isChecked ? customRanges : []),
+    ]);
+  }
+
   return (
     <div>
       <div className="flex items-center justify-between p-4">
@@ -93,7 +136,9 @@ export default function ScanStats({
           <div className="flex flex-row justify-end">
             <Sheet>
               <SheetTrigger>
-                <Button style={{ marginRight: '25px' }}>Configure Network</Button>
+                <Button style={{ marginRight: "25px" }}>
+                  Configure Network
+                </Button>
               </SheetTrigger>
               <SheetContent className="min-w-[600px] sm:w-[540px]">
                 <SheetHeader className="flex flex-row justify-between m-4">
@@ -222,9 +267,16 @@ export default function ScanStats({
                 </SheetHeader>
                 <Collapsible className="min-w-[350px] space-y-2">
                   <div className="flex items-center justify-between space-x-4 px-4">
-                    <h4 className="text-sm font-semibold">
-                      Pre-defined for CFU ({ipRanges.length})
-                    </h4>
+                    <div className="flex flex-row items-center">
+                      <Checkbox
+                        className="mx-2"
+                        checked={areAllDefaultSelected()}
+                        onCheckedChange={toggleDefault}
+                      />
+                      <h4 className="text-sm font-semibold">
+                        Pre-defined for CFU ({ipRanges.length})
+                      </h4>
+                    </div>
                     <CollapsibleTrigger asChild>
                       <Button variant="ghost" size="sm" className="w-9 p-0">
                         <ChevronsUpDown className="h-4 w-4" />
@@ -238,11 +290,25 @@ export default function ScanStats({
                         key={i}
                         className={cn(
                           "rounded-md border px-4 py-3 font-mono text-sm",
-                          range && ipRangeStr(e) === ipRangeStr(range)
+                          selectedRanges.find(
+                            (r) => ipRangeStr(e) === ipRangeStr(r)
+                          )
                             ? "bg-green-400"
                             : ""
                         )}
-                        onClick={() => setRange(e)}
+                        onClick={() => {
+                          const hasRange = selectedRanges.find(
+                            (r) => ipRangeStr(e) === ipRangeStr(r)
+                          );
+                          if (hasRange) {
+                            const withoutSelected = selectedRanges.filter(
+                              (r) => ipRangeStr(e) !== ipRangeStr(r)
+                            );
+                            saveSelectedRanges((prev) => [...withoutSelected]);
+                          } else {
+                            saveSelectedRanges((prev) => [...prev, e]);
+                          }
+                        }}
                       >
                         {ipRangeStr(e)}
                       </div>
@@ -251,9 +317,16 @@ export default function ScanStats({
                 </Collapsible>
                 <Collapsible className="min-w-[350px] space-y-2">
                   <div className="flex items-center justify-between space-x-4 px-4">
-                    <h4 className="text-sm font-semibold">
-                      Custom ({customRanges.length})
-                    </h4>
+                    <div className="flex flex-row items-center">
+                      <Checkbox
+                        className="mx-2"
+                        checked={areAllCustomSelected()}
+                        onCheckedChange={toggleCustom}
+                      />
+                      <h4 className="text-sm font-semibold">
+                        Custom ({customRanges.length})
+                      </h4>
+                    </div>
                     <CollapsibleTrigger asChild>
                       <Button variant="ghost" size="sm" className="w-9 p-0">
                         <ChevronsUpDown className="h-4 w-4" />
@@ -267,11 +340,25 @@ export default function ScanStats({
                         key={i}
                         className={cn(
                           "rounded-md border px-4 py-3 font-mono text-sm",
-                          range && ipRangeStr(e) === ipRangeStr(range)
+                          selectedRanges.find(
+                            (r) => ipRangeStr(e) === ipRangeStr(r)
+                          )
                             ? "bg-green-400"
                             : ""
                         )}
-                        onClick={() => setRange(e)}
+                        onClick={() => {
+                          const hasRange = selectedRanges.find(
+                            (r) => ipRangeStr(e) === ipRangeStr(r)
+                          );
+                          if (hasRange) {
+                            const withoutSelected = selectedRanges.filter(
+                              (r) => ipRangeStr(e) !== ipRangeStr(r)
+                            );
+                            saveSelectedRanges((prev) => [...withoutSelected]);
+                          } else {
+                            saveSelectedRanges((prev) => [...prev, e]);
+                          }
+                        }}
                       >
                         {ipRangeStr(e)}
                       </div>
@@ -280,10 +367,14 @@ export default function ScanStats({
                 </Collapsible>
               </SheetContent>
             </Sheet>
-            <Button style={{ backgroundColor: "#e94d1b" }} onClick={onScan}>Scan Network</Button>
+            <Button style={{ backgroundColor: "#e94d1b" }} onClick={onScan}>
+              Scan Network
+            </Button>
           </div>
           <p className="font-mono text-xs">
-            {range ? `Selected: ${ipRangeStr(range)}` : "Range Not Selected"}
+            {selectedRanges.length
+              ? `Selected: ${selectedRanges.length}`
+              : "No Range Selected"}
           </p>
         </div>
       </div>
@@ -335,9 +426,7 @@ export default function ScanStats({
             <Flame />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">
-              X
-            </div>
+            <div className="text-2xl font-bold text-orange-600">X</div>
           </CardContent>
         </Card>
       </div>

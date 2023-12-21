@@ -41,13 +41,9 @@ function parseLogData(logData: string): { controller: string; power_type: string
 export async function POST(request: NextRequest) {
     try {
         const {
-            address,
-            end,
-            start,
+            ranges
         }: {
-            address: string;
-            start: number;
-            end: number;
+            ranges: IpRange[];
         } = await request.json();
 
         const supabase = createClient<Database>(
@@ -64,8 +60,10 @@ export async function POST(request: NextRequest) {
         const stream = new ReadableStream({
             async start(c) {
                 const encoder = new TextEncoder();
-                for (let i = start; i <= end; i++) {
-                    await getIpMetadata(c, encoder, client, address, i, models, end - start + 1);
+                for (const r of ranges) {
+                    for (let i = r.start; i <= r.end; i++) {
+                        await getIpMetadata(c, encoder, client, r.address, i, models, r.end - r.start + 1);
+                    }
                 }
                 c.close();
             },
