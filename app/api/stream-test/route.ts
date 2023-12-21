@@ -1,9 +1,8 @@
-import { NextApiResponse } from 'next';
 import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(response: NextApiResponse) {
+export async function GET() {
     const stream = new ReadableStream({
         async start(controller) {
             const encoder = new TextEncoder();

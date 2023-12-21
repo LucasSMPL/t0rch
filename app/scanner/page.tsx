@@ -56,7 +56,7 @@ export default function ScannerPage() {
           range={range}
           setRange={setRange}
         />
-        {progress != null && <Progress value={progress} className="w-[60%]" />}
+        <div className="pt-10 flex item-center justify-center">{progress != null && <Progress indicatorColor={"bg-orange-500"} value={progress} className="w-[60%]"/>}</div>
       </div>
       <ScanTable scannedIps={ips} />
     </div>
