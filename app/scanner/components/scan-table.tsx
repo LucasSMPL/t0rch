@@ -211,6 +211,21 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
       );
     },
   },
+  {
+    accessorKey: "psu_failure",
+    header: ({ column }) => (
+      <ColumnHeader column={column} title="PSU Failure" />
+    ),
+    cell: ({ row }) => {
+      return (
+        <div className="flex space-x-2">
+          <span className="truncate font-medium">
+            {row.original.psu_failure? "Yes" : "No"}
+          </span>
+        </div>
+      );
+    },
+  },
 
   // ACTIONS NEED BUILT FROM SCRATCH
   // {

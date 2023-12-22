@@ -18,9 +18,11 @@ function hexToLabel(hexCode: number): string {
     return hexLabelMapping[hexCode] || "Unknown";
 }
 
-function parseLogData(logData: string): { controller: string; power_type: string } {
+function parseLogData(logData: string): { controller: string; power_type: string; psu_failure: boolean; } {
     let controller = "N/A";
     let power_type = "Unknown";
+    let hashboard_type = "Unknown";
+    let psu_failure = false
 
     const powerMatch = logData.match(/power type version: (0x[0-9a-fA-F]+)/);
     if (powerMatch && powerMatch[1]) {
@@ -35,7 +37,15 @@ function parseLogData(logData: string): { controller: string; power_type: string
         }
     }
 
-    return { controller, power_type };
+    const psuFailing = ["power voltage can not meet the target", "ERROR_POWER_LOST", "stop_mining: get power type version failed!"];
+    for (const word of psuFailing) {
+        if (logData.includes(word)) {
+            psu_failure = true;
+            break;
+        }
+    }
+
+    return { controller, power_type, psu_failure };
 }
 
 export async function POST(request: NextRequest) {
@@ -45,6 +55,7 @@ export async function POST(request: NextRequest) {
         }: {
             ranges: IpRange[];
         } = await request.json();
+        console.log(ranges);
 
         const supabase = createClient<Database>(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -102,9 +113,9 @@ async function getIpMetadata(
 
         const model = models.find(e => {
             return `${e.manufacturer!.name} ${e.model} (${e.hashrate}T)` === summData.INFO.type ||
-                `${e.manufacturer!.name}Miner ${e.model} (${e.hashrate}T)` === summData.INFO.type ||
-                `${e.manufacturer!.name} ${e.model} (${e.hashrate})` === summData.INFO.type ||
-                `${e.manufacturer!.name} ${e.model}` === summData.INFO.type;
+                    `${e.manufacturer!.name}Miner ${e.model} (${e.hashrate}T)` === summData.INFO.type ||
+                    `${e.manufacturer!.name} ${e.model} (${e.hashrate})` === summData.INFO.type ||
+                    `${e.manufacturer!.name} ${e.model}` === summData.INFO.type;
         });
         if (!model) throw Error(`Model not found: ${summData.INFO.type}`);
 
@@ -121,6 +132,8 @@ async function getIpMetadata(
             controller,
             power_type,
             is_underhashing: (summData.SUMMARY.at(0)?.rate_5s ?? 0 / 1000) < (model.hashrate! * 0.8),
+                is_found: true,
+                psu_failure: true
         };
         const queue = encoder.encode(JSON.stringify(res));
         c.enqueue(queue);
@@ -139,6 +152,8 @@ async function getIpMetadata(
             controller: "N/A",
             power_type: "N/A",
             is_underhashing: false,
+                is_found: false,
+                psu_failure: false
         };
         const queue = encoder.encode(JSON.stringify(res));
         c.enqueue(queue);

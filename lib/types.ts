@@ -10,7 +10,9 @@ type ScannedIp = {
     hb_count: number,
     power_type: string,
     controller: string,
-    is_underhashing: boolean
+    is_underhashing: boolean,
+    is_found: boolean,
+    psu_failure: boolean,
 }
 type IpRange = {
     label: string;
