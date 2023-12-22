@@ -66,9 +66,7 @@ export async function POST(request: NextRequest) {
                         promises.push(getIpMetadata(c, encoder, client, r.address, i, models));
                     }
                 }
-                c.close();
                 await Promise.allSettled(promises);
-
                 c.close();
             },
         });

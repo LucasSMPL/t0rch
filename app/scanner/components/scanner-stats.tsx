@@ -140,7 +140,7 @@ export default function ScanStats({
                   Configure Network
                 </Button>
               </SheetTrigger>
-              <SheetContent className="min-w-[600px] sm:w-[540px]">
+              <SheetContent className="min-w-[600px] sm:w-[540px] overflow-scroll">
                 <SheetHeader className="flex flex-row justify-between m-4">
                   <div>
                     <SheetTitle>IP Ranges</SheetTitle>
