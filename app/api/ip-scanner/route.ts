@@ -60,11 +60,15 @@ export async function POST(request: NextRequest) {
         const stream = new ReadableStream({
             async start(c) {
                 const encoder = new TextEncoder();
+                let promises = [];
                 for (const r of ranges) {
                     for (let i = r.start; i <= r.end; i++) {
-                        await getIpMetadata(c, encoder, client, r.address, i, models, r.end - r.start + 1);
+                        promises.push(getIpMetadata(c, encoder, client, r.address, i, models));
                     }
                 }
+                c.close();
+                await Promise.allSettled(promises);
+
                 c.close();
             },
         });
@@ -85,7 +89,6 @@ async function getIpMetadata(
     address: string,
     i: number,
     models: Models,
-    total: number,
 ): Promise<void> {
     try {
         const summRes = await client.fetch(`http://${address}.${i}/cgi-bin/summary.cgi`);
