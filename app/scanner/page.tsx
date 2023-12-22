@@ -29,14 +29,17 @@ export default function ScannerPage() {
         method: "POST",
         body: JSON.stringify({ ranges: selectedRanges }),
       });
+      const total = selectedRanges.reduce((t, c) => t + c.end - c.start + 1, 0);
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       while (true && reader != null) {
         const { value, done } = await reader.read();
         if (done) break;
-        const decoded: StreamRes<ScannedIp> = JSON.parse(decoder.decode(value));
-        setIps((prev) => [...prev, decoded.result]);
-        setProgress((decoded.done / decoded.total) * 100);
+        const d = decoder.decode(value);
+        console.log(d);
+        const decoded: ScannedIp[] = JSON.parse(`[${d.replace(/}{/g, "},{")}]`);
+        setIps((prev) => [...prev, ...decoded]);
+        setProgress((ips.length / total) * 100);
       }
     } catch (error) {
       console.error("Error during scan:", error);

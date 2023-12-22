@@ -1,9 +1,15 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const [streamRes, setStreamRes] = useState<any[]>([]);
+  useEffect(() => {
+    return () => {
+      console.log(`hello: ${Math.random()}`);
+    };
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -19,8 +25,11 @@ export default function Home() {
       while (true && reader) {
         const { value, done } = await reader.read();
         if (done) break;
-        const decoded = JSON.parse(decoder.decode(value));
-        setStreamRes((prev) => [...prev, decoded]);
+        const d = decoder.decode(value);
+        console.log(d);
+        const decoded = JSON.parse(`[${d.replace(/}{/g, "},{")}]`);
+
+        setStreamRes((prev) => [...prev, ...decoded]);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -29,8 +38,9 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
+      <Link href={"/scanner"}>Open Scanner</Link>
       <Button onClick={fetchData}>Start Stream</Button>
-      <p>{JSON.stringify(streamRes, null, 2)}</p>
+      <pre>{JSON.stringify(streamRes, null, 2)}</pre>
     </main>
   );
 }

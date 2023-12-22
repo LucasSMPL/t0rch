@@ -18,11 +18,11 @@ type IpRange = {
     start: number;
     end: number;
 };
-type StreamRes<T> = {
-    result: T,
-    total: number,
-    done: number,
-}
+// type StreamRes<T> = {
+//     result: T,
+//     total: number,
+//     done: number,
+// }
 
 type IpSummary = {
     STATUS: {

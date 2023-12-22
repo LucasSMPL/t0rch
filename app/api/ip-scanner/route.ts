@@ -107,45 +107,37 @@ async function getIpMetadata(
         });
         if (!model) throw Error(`Model not found: ${summData.INFO.type}`);
 
-        const res: StreamRes<ScannedIp> = {
-            result: {
-                id: i,
-                ip: `${address}.${i}`,
-                miner_type: summData.INFO.type,
-                // uptime: intervalToDuration({start: 0, end: summData.SUMMARY.at(0)?.elapsed ?? 0}),
-                uptime: summData.SUMMARY.at(0)?.elapsed ?? 0,
-                hashrate: (summData.SUMMARY.at(0)?.rate_5s ?? 0) / 1000,
-                fan_count: statsData.STATS.at(0)?.fan_num ?? 0,
-                hb_count: statsData.STATS.at(0)?.chain_num ?? 0,
-                worker: minerData.pools[0].user ?? "",
-                controller,
-                power_type,
-                is_underhashing: (summData.SUMMARY.at(0)?.rate_5s ?? 0 / 1000) < (model.hashrate! * 0.8),
-            },
-            total,
-            done: i,
+        const res: ScannedIp = {
+            id: i,
+            ip: `${address}.${i}`,
+            miner_type: summData.INFO.type,
+            // uptime: intervalToDuration({start: 0, end: summData.SUMMARY.at(0)?.elapsed ?? 0}),
+            uptime: summData.SUMMARY.at(0)?.elapsed ?? 0,
+            hashrate: (summData.SUMMARY.at(0)?.rate_5s ?? 0) / 1000,
+            fan_count: statsData.STATS.at(0)?.fan_num ?? 0,
+            hb_count: statsData.STATS.at(0)?.chain_num ?? 0,
+            worker: minerData.pools[0].user ?? "",
+            controller,
+            power_type,
+            is_underhashing: (summData.SUMMARY.at(0)?.rate_5s ?? 0 / 1000) < (model.hashrate! * 0.8),
         };
         const queue = encoder.encode(JSON.stringify(res));
         c.enqueue(queue);
 
     } catch (error) {
         console.error(`Error fetching data for IP ${address}.${i}:`, error);
-        const res: StreamRes<ScannedIp> = {
-            result: {
-                id: i,
-                ip: `${address}.${i}`,
-                miner_type: "N/A",
-                uptime: 0,
-                hashrate: 0,
-                fan_count: 0,
-                hb_count: 0,
-                worker: "N/A",
-                controller: "N/A",
-                power_type: "N/A",
-                is_underhashing: false,
-            },
-            total,
-            done: i,
+        const res: ScannedIp = {
+            id: i,
+            ip: `${address}.${i}`,
+            miner_type: "N/A",
+            uptime: 0,
+            hashrate: 0,
+            fan_count: 0,
+            hb_count: 0,
+            worker: "N/A",
+            controller: "N/A",
+            power_type: "N/A",
+            is_underhashing: false,
         };
         const queue = encoder.encode(JSON.stringify(res));
         c.enqueue(queue);

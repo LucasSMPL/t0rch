@@ -20,11 +20,9 @@ export async function GET() {
 }
 
 async function test(i: number, encoder: TextEncoder, controller: ReadableStreamDefaultController) {
-    await new Promise(r => setTimeout(r, Math.random() * 1000)).then(() => {
-        const result = { result: i };
-        console.log(result);
-
-        const queue = encoder.encode(JSON.stringify(result));
-        controller.enqueue(queue);
-    });
+    await new Promise(r => setTimeout(r, Math.random() * 1000));
+    const result = { result: i, };
+    const queue = encoder.encode(JSON.stringify(result));
+    controller.enqueue(queue);
+    return result;
 }
