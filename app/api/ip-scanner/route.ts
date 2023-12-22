@@ -18,7 +18,7 @@ function hexToLabel(hexCode: number): string {
     return hexLabelMapping[hexCode] || "Unknown";
 }
 
-function parseLogData(logData: string): { controller: string; power_type: string; psu_failure: boolean; } {
+function parseLogData(logData: string): { controller: string; power_type: string; hashboard_type: string, psu_failure: boolean; } {
     let controller = "N/A";
     let power_type = "Unknown";
     let hashboard_type = "Unknown";
@@ -37,6 +37,12 @@ function parseLogData(logData: string): { controller: string; power_type: string
         }
     }
 
+    const hashboardModel = logData.match(/load machine (.*?) conf /);
+    if (hashboardModel && hashboardModel[1]) {
+        console.log(hashboardModel);
+        hashboard_type = hashboardModel[1];
+    }
+
     const psuFailing = ["power voltage can not meet the target", "ERROR_POWER_LOST", "stop_mining: get power type version failed!"];
     for (const word of psuFailing) {
         if (logData.includes(word)) {
@@ -45,7 +51,7 @@ function parseLogData(logData: string): { controller: string; power_type: string
         }
     }
 
-    return { controller, power_type, psu_failure };
+    return { controller, power_type, hashboard_type, psu_failure };
 }
 
 export async function POST(request: NextRequest) {
@@ -109,7 +115,7 @@ async function getIpMetadata(
         const logsRes = await client.fetch(`http://${address}.${i}/cgi-bin/log.cgi`);
         const logsData = await logsRes.text();
 
-        const { controller, power_type } = parseLogData(logsData);
+        const { controller, power_type, hashboard_type, psu_failure } = parseLogData(logsData);
 
         const model = models.find(e => {
             return `${e.manufacturer!.name} ${e.model} (${e.hashrate}T)` === summData.INFO.type ||
@@ -133,7 +139,8 @@ async function getIpMetadata(
             power_type,
             is_underhashing: (summData.SUMMARY.at(0)?.rate_5s ?? 0 / 1000) < (model.hashrate! * 0.8),
                 is_found: true,
-                psu_failure: true
+                hashboard_type: hashboard_type,
+                psu_failure: psu_failure
         };
         const queue = encoder.encode(JSON.stringify(res));
         c.enqueue(queue);
@@ -153,6 +160,7 @@ async function getIpMetadata(
             power_type: "N/A",
             is_underhashing: false,
                 is_found: false,
+                hashboard_type: "N/A",
                 psu_failure: false
         };
         const queue = encoder.encode(JSON.stringify(res));

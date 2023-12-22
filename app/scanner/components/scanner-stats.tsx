@@ -45,12 +45,14 @@ export default function ScanStats({
   underhashingCount,
   lessThan3Count,
   notFoundCount,
+  psuFailureCount,
 }: {
   onScan: () => void;
   scanCount: number;
   underhashingCount: number;
   lessThan3Count: number;
   notFoundCount: number;
+  psuFailureCount: number;
 }) {
   const nameRef = useRef<HTMLInputElement | null>(null);
   const addressRef = useRef<HTMLInputElement | null>(null);
@@ -428,7 +430,7 @@ export default function ScanStats({
             <Flame />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">X</div>
+            <div className="text-2xl font-bold text-orange-600">{psuFailureCount}</div>
           </CardContent>
         </Card>
       </div>

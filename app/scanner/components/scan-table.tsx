@@ -197,15 +197,15 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
     },
   },
   {
-    accessorKey: "is_underhashing",
+    accessorKey: "hashboard_type",
     header: ({ column }) => (
-      <ColumnHeader column={column} title="Underhashing" />
+      <ColumnHeader column={column} title="Hashboard" />
     ),
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
           <span className="truncate font-medium">
-            {row.original.is_underhashing? "Yes" : "No"}
+            {row.original.hashboard_type}
           </span>
         </div>
       );

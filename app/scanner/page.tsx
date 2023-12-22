@@ -56,6 +56,7 @@ export default function ScannerPage() {
           underhashingCount={ips.filter((e) => e.is_underhashing).length}
           lessThan3Count={ips.filter((e) => e.hb_count < 3 && e.is_found).length}
           notFoundCount={ips.filter((e) => !e.is_found).length}
+          psuFailureCount={ips.filter((e) => e.psu_failure).length}
         />
         <div className="pt-10 flex item-center justify-center">
           {progress != null && (

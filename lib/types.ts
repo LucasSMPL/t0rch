@@ -12,6 +12,7 @@ type ScannedIp = {
     controller: string,
     is_underhashing: boolean,
     is_found: boolean,
+    hashboard_type: string,
     psu_failure: boolean,
 }
 type IpRange = {
