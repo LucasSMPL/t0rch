@@ -29,7 +29,7 @@ export default function ScannerPage() {
     }
     try {
       setProgress(0);
-      const response = await fetch(`http://localhost:7070/scan-test`, {
+      const response = await fetch(`http://localhost:7070/scan`, {
         method: "POST",
         body: JSON.stringify({
           ranges: selectedRanges.map((e) => ({
