@@ -1,7 +1,6 @@
 import { ColumnHeader, DataTable } from "@/components/data-table";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { getSiPrefixedNumber } from "@/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { formatDistance } from "date-fns";
 import { Filter } from "lucide-react";
@@ -51,7 +50,7 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
   {
     accessorKey: "id",
     header: ({ column }) => <ColumnHeader column={column} title="ID" />,
-    cell: ({ row }) => <div>{row.original.id}</div>,
+    cell: ({ row }) => <div>{row.id}</div>,
     enableSorting: false,
     enableHiding: false,
   },
@@ -198,9 +197,7 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
   },
   {
     accessorKey: "hashboard_type",
-    header: ({ column }) => (
-      <ColumnHeader column={column} title="Hashboard" />
-    ),
+    header: ({ column }) => <ColumnHeader column={column} title="Hashboard" />,
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
@@ -220,7 +217,7 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
       return (
         <div className="flex space-x-2">
           <span className="truncate font-medium">
-            {row.original.psu_failure? "Yes" : "No"}
+            {row.original.psu_failure ? "Yes" : "No"}
           </span>
         </div>
       );

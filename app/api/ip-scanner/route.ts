@@ -119,9 +119,9 @@ async function getIpMetadata(
 
         const model = models.find(e => {
             return `${e.manufacturer!.name} ${e.model} (${e.hashrate}T)` === summData.INFO.type ||
-                    `${e.manufacturer!.name}Miner ${e.model} (${e.hashrate}T)` === summData.INFO.type ||
-                    `${e.manufacturer!.name} ${e.model} (${e.hashrate})` === summData.INFO.type ||
-                    `${e.manufacturer!.name} ${e.model}` === summData.INFO.type;
+                `${e.manufacturer!.name}Miner ${e.model} (${e.hashrate}T)` === summData.INFO.type ||
+                `${e.manufacturer!.name} ${e.model} (${e.hashrate})` === summData.INFO.type ||
+                `${e.manufacturer!.name} ${e.model}` === summData.INFO.type;
         });
         if (!model) throw Error(`Model not found: ${summData.INFO.type}`);
 
@@ -138,9 +138,9 @@ async function getIpMetadata(
             controller,
             power_type,
             is_underhashing: (summData.SUMMARY.at(0)?.rate_5s ?? 0 / 1000) < (model.hashrate! * 0.8),
-                is_found: true,
-                hashboard_type: hashboard_type,
-                psu_failure: psu_failure
+            is_found: true,
+            hashboard_type: hashboard_type,
+            psu_failure: psu_failure
         };
         const queue = encoder.encode(JSON.stringify(res));
         c.enqueue(queue);
@@ -159,9 +159,9 @@ async function getIpMetadata(
             controller: "N/A",
             power_type: "N/A",
             is_underhashing: false,
-                is_found: false,
-                hashboard_type: "N/A",
-                psu_failure: false
+            is_found: false,
+            hashboard_type: "N/A",
+            psu_failure: false
         };
         const queue = encoder.encode(JSON.stringify(res));
         c.enqueue(queue);

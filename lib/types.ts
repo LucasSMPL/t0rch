@@ -1,9 +1,7 @@
 type ScannedIp = {
-    id: number,
     ip: string,
     miner_type: string,
     worker: string,
-    // pool_1: string,
     uptime: number,
     hashrate: number,
     fan_count: number,
@@ -11,7 +9,6 @@ type ScannedIp = {
     power_type: string,
     controller: string,
     is_underhashing: boolean,
-    is_found: boolean,
     hashboard_type: string,
     psu_failure: boolean,
 }

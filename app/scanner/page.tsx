@@ -3,7 +3,7 @@ import { Progress } from "@/components/ui/progress";
 
 import { useToast } from "@/components/ui/use-toast";
 import useLocalStorage from "@/hooks/use-local-storage";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import ScanTable from "./components/scan-table";
 import ScannerStats from "./components/scanner-stats";
 export default function ScannerPage() {
@@ -15,6 +15,10 @@ export default function ScannerPage() {
     []
   );
   const [progress, setProgress] = useState<number | null>(null);
+  const total = useMemo(
+    () => selectedRanges.reduce((t, c) => t + c.end - c.start + 1, 0),
+    [selectedRanges]
+  );
 
   const startScan = async () => {
     if (!selectedRanges.length) {
@@ -25,21 +29,33 @@ export default function ScannerPage() {
     }
     try {
       setProgress(0);
-      const response = await fetch(`/api/ip-scanner`, {
+      const response = await fetch(`http://localhost:7070/scan-test`, {
         method: "POST",
-        body: JSON.stringify({ ranges: selectedRanges }),
+        body: JSON.stringify({
+          ranges: selectedRanges.map((e) => ({
+            start: `${e.address}.${e.start}`,
+            end: `${e.address}.${e.end}`,
+          })),
+        }),
       });
-      const total = selectedRanges.reduce((t, c) => t + c.end - c.start + 1, 0);
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       while (true && reader != null) {
         const { value, done } = await reader.read();
         if (done) break;
         const d = decoder.decode(value);
-        console.log(d);
-        const decoded: ScannedIp[] = JSON.parse(`[${d.replace(/}{/g, "},{")}]`);
-        setIps((prev) => [...prev, ...decoded]);
-        setProgress((ips.length / total) * 100);
+        // const decoded: ScannedIp[] = JSON.parse(`[${d.replace(/}{/g, "},{")}]`);
+        // setIps((prev) => [...prev, ...decoded]);
+        // const decoded: { event: string; data: ScannedIp } = JSON.parse(d);
+        const matches = d.match(/data:(\{.*?\})/gs);
+
+        const extractedData: ScannedIp[] | undefined = matches?.map((match) =>
+          JSON.parse(match.replace("data:", "").trim())
+        );
+        if (extractedData) {
+          setIps((prev) => [...prev, ...extractedData]);
+          setProgress((ips.length / total) * 100);
+        }
       }
     } catch (error) {
       console.error("Error during scan:", error);
@@ -54,8 +70,8 @@ export default function ScannerPage() {
           onScan={startScan}
           scanCount={ips.length}
           underhashingCount={ips.filter((e) => e.is_underhashing).length}
-          lessThan3Count={ips.filter((e) => e.hb_count < 3 && e.is_found).length}
-          notFoundCount={ips.filter((e) => !e.is_found).length}
+          lessThan3Count={ips.filter((e) => e.hb_count < 3).length}
+          notFoundCount={total - ips.length}
           psuFailureCount={ips.filter((e) => e.psu_failure).length}
         />
         <div className="pt-10 flex item-center justify-center">

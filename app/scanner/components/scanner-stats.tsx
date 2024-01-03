@@ -430,7 +430,9 @@ export default function ScanStats({
             <Flame />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-orange-600">{psuFailureCount}</div>
+            <div className="text-2xl font-bold text-orange-600">
+              {psuFailureCount}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -441,7 +443,7 @@ export default function ScanStats({
 const ipRanges: IpRange[] = [
   {
     label: "OSO",
-    address: "10.0.0",
+    address: "10.0.100",
     start: 1,
     end: 50,
   },
