@@ -32,7 +32,9 @@ import { CheckedState } from "@radix-ui/react-checkbox";
 import {
   ArrowBigDownDash,
   ChevronsUpDown,
+  FireExtinguisher,
   Flame,
+  FlameKindling,
   HelpCircle,
   Radar,
 } from "lucide-react";
@@ -132,9 +134,10 @@ export default function ScanStats({
   return (
     <div>
       <div className="flex items-center justify-between p-4">
-        <h3 className="text-2xl font-bold text-orange-600">
-          <Flame style={{ color: "#ffffff" }} />
-          t0rch | asic scanner
+        <h3 className="text-2xl font-bold text-orange-600 flex items-center">
+          <FlameKindling style={{ color: "#ffffff" }} />
+          <span className="pl-4 pr-4">t0rch | asic scanner</span>
+          <FireExtinguisher style={{ color: "#ffffff" }} />
         </h3>
         <div className="flex flex-col p-4 space-x-4 space-y-2">
           <div className="flex flex-row justify-end">
