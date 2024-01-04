@@ -46,6 +46,7 @@ export default function ScanStats({
   scanCount,
   underhashingCount,
   lessThan3Count,
+  missingFanCount,
   notFoundCount,
   psuFailureCount,
 }: {
@@ -53,6 +54,7 @@ export default function ScanStats({
   scanCount: number;
   underhashingCount: number;
   lessThan3Count: number;
+  missingFanCount: number;
   notFoundCount: number;
   psuFailureCount: number;
 }) {
@@ -385,7 +387,7 @@ export default function ScanStats({
           </p>
         </div>
       </div>
-      <div className="grid gap-4 md:grid-cols-4 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-5 lg:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
@@ -428,6 +430,19 @@ export default function ScanStats({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
+              Miners Missing Fans
+            </CardTitle>
+            <Flame />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-orange-600">
+              {missingFanCount}
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
               Miners Needing PSU
             </CardTitle>
             <Flame />
@@ -444,6 +459,12 @@ export default function ScanStats({
 }
 
 const ipRanges: IpRange[] = [
+  {
+    label: "CF HQ",
+    address: "10.0.0",
+    start: 1,
+    end: 255,
+  },
   {
     label: "OSO",
     address: "10.0.100",

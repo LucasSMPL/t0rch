@@ -71,6 +71,7 @@ export default function ScannerPage() {
           scanCount={ips.length}
           underhashingCount={ips.filter((e) => e.is_underhashing).length}
           lessThan3Count={ips.filter((e) => e.hb_count < 3).length}
+          missingFanCount={ips.filter((e) => e.fan_count < 4).length}
           notFoundCount={total - ips.length}
           psuFailureCount={ips.filter((e) => e.psu_failure).length}
         />
