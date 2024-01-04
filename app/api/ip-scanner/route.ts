@@ -126,7 +126,7 @@ async function getIpMetadata(
         if (!model) throw Error(`Model not found: ${summData.INFO.type}`);
 
         const res: ScannedIp = {
-            id: i,
+            // id: i,
             ip: `${address}.${i}`,
             miner_type: summData.INFO.type,
             // uptime: intervalToDuration({start: 0, end: summData.SUMMARY.at(0)?.elapsed ?? 0}),
@@ -138,7 +138,7 @@ async function getIpMetadata(
             controller,
             power_type,
             is_underhashing: (summData.SUMMARY.at(0)?.rate_5s ?? 0 / 1000) < (model.hashrate! * 0.8),
-            is_found: true,
+            // is_found: true,
             hashboard_type: hashboard_type,
             psu_failure: psu_failure
         };
@@ -148,7 +148,7 @@ async function getIpMetadata(
     } catch (error) {
         console.error(`Error fetching data for IP ${address}.${i}:`, error);
         const res: ScannedIp = {
-            id: i,
+            // id: i,
             ip: `${address}.${i}`,
             miner_type: "N/A",
             uptime: 0,
@@ -159,7 +159,7 @@ async function getIpMetadata(
             controller: "N/A",
             power_type: "N/A",
             is_underhashing: false,
-            is_found: false,
+            // is_found: false,
             hashboard_type: "N/A",
             psu_failure: false
         };

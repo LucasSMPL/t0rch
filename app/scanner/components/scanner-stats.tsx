@@ -26,9 +26,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useToast } from "@/components/ui/use-toast";
-import useLocalStorage from "@/hooks/use-local-storage";
 import { cn, ipRangeStr } from "@/lib/utils";
 import { CheckedState } from "@radix-ui/react-checkbox";
+import { useLocalStorageValue } from "@react-hookz/web";
 import {
   ArrowBigDownDash,
   ChevronsUpDown,
@@ -65,14 +65,14 @@ export default function ScanStats({
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
 
-  const [customRanges, saveCustomRanges] = useLocalStorage<IpRange[]>(
-    "custom-ranges",
-    []
-  );
-  const [selectedRanges, saveSelectedRanges] = useLocalStorage<IpRange[]>(
-    "selected-ranges",
-    []
-  );
+  const customRanges = useLocalStorageValue<IpRange[]>("custom-ranges", {
+    defaultValue: [],
+    initializeWithValue: false,
+  });
+  const selectedRanges = useLocalStorageValue<IpRange[]>("selected-ranges", {
+    defaultValue: [],
+    initializeWithValue: false,
+  });
 
   function onAddressInput(event: ChangeEvent<HTMLInputElement>) {
     const input = event.target;
@@ -93,9 +93,9 @@ export default function ScanStats({
   }
 
   function areAllDefaultSelected(): boolean {
-    if (!selectedRanges.length) return false;
+    if (!selectedRanges.value?.length) return false;
     for (const r of ipRanges) {
-      const isSelected = selectedRanges.find(
+      const isSelected = selectedRanges.value.find(
         (e) => ipRangeStr(e) === ipRangeStr(r)
       );
       if (!isSelected) {
@@ -105,9 +105,9 @@ export default function ScanStats({
     return true;
   }
   function areAllCustomSelected(): boolean {
-    if (!selectedRanges.length) return false;
-    for (const r of customRanges) {
-      const isSelected = selectedRanges.find(
+    if (!selectedRanges.value?.length) return false;
+    for (const r of customRanges.value ?? []) {
+      const isSelected = selectedRanges.value?.find(
         (e) => ipRangeStr(e) === ipRangeStr(r)
       );
       if (!isSelected) {
@@ -117,19 +117,19 @@ export default function ScanStats({
     return true;
   }
   function toggleDefault(isChecked: CheckedState): void {
-    saveSelectedRanges((prev) => [
-      ...prev.filter(
+    selectedRanges.set((prev) => [
+      ...(prev?.filter(
         (r) => !ipRanges.find((e) => ipRangeStr(e) === ipRangeStr(r))
-      ),
+      ) ?? []),
       ...(isChecked ? ipRanges : []),
     ]);
   }
   function toggleCustom(isChecked: CheckedState): void {
-    saveSelectedRanges((prev) => [
-      ...prev.filter(
-        (r) => !customRanges.find((e) => ipRangeStr(e) === ipRangeStr(r))
-      ),
-      ...(isChecked ? customRanges : []),
+    selectedRanges.set((prev) => [
+      ...(prev?.filter(
+        (r) => !customRanges.value?.find((e) => ipRangeStr(e) === ipRangeStr(r))
+      ) ?? []),
+      ...(isChecked ? customRanges.value ?? [] : []),
     ]);
   }
 
@@ -144,11 +144,9 @@ export default function ScanStats({
         <div className="flex flex-col p-4 space-x-4 space-y-2">
           <div className="flex flex-row justify-end">
             <Sheet>
-              <SheetTrigger>
-                <Button style={{ marginRight: "25px" }}>
-                  Configure Network
-                </Button>
-              </SheetTrigger>
+              <Button style={{ marginRight: "25px" }} asChild>
+                <SheetTrigger>Configure Network</SheetTrigger>
+              </Button>
               <SheetContent className="min-w-[600px] sm:w-[540px] overflow-scroll">
                 <SheetHeader className="flex flex-row justify-between m-4">
                   <div>
@@ -247,7 +245,7 @@ export default function ScanStats({
                                 .number()
                                 .parse(endRef.current!.value!),
                             };
-                            const hasDuplicate = customRanges.find(
+                            const hasDuplicate = customRanges.value?.find(
                               (cR) =>
                                 cR.label === newRange.label ||
                                 (cR.address === newRange.address &&
@@ -260,7 +258,10 @@ export default function ScanStats({
                                 variant: "destructive",
                               });
                             }
-                            saveCustomRanges((prev) => [...prev, newRange]);
+                            customRanges.set((prev) => [
+                              ...(prev ?? []),
+                              newRange,
+                            ]);
                             setOpen(false);
                             toast({
                               title: "Custom Range Added Successfully!",
@@ -299,23 +300,26 @@ export default function ScanStats({
                         key={i}
                         className={cn(
                           "rounded-md border px-4 py-3 font-mono text-sm",
-                          selectedRanges.find(
+                          selectedRanges.value?.find(
                             (r) => ipRangeStr(e) === ipRangeStr(r)
                           )
                             ? "bg-green-400"
                             : ""
                         )}
                         onClick={() => {
-                          const hasRange = selectedRanges.find(
+                          const hasRange = selectedRanges.value?.find(
                             (r) => ipRangeStr(e) === ipRangeStr(r)
                           );
                           if (hasRange) {
-                            const withoutSelected = selectedRanges.filter(
-                              (r) => ipRangeStr(e) !== ipRangeStr(r)
-                            );
-                            saveSelectedRanges((prev) => [...withoutSelected]);
+                            const withoutSelected =
+                              selectedRanges.value?.filter(
+                                (r) => ipRangeStr(e) !== ipRangeStr(r)
+                              );
+                            selectedRanges.set((prev) => [
+                              ...(withoutSelected ?? []),
+                            ]);
                           } else {
-                            saveSelectedRanges((prev) => [...prev, e]);
+                            selectedRanges.set((prev) => [...(prev ?? []), e]);
                           }
                         }}
                       >
@@ -333,7 +337,7 @@ export default function ScanStats({
                         onCheckedChange={toggleCustom}
                       />
                       <h4 className="text-sm font-semibold">
-                        Custom ({customRanges.length})
+                        Custom ({customRanges.value?.length})
                       </h4>
                     </div>
                     <CollapsibleTrigger asChild>
@@ -344,28 +348,31 @@ export default function ScanStats({
                     </CollapsibleTrigger>
                   </div>
                   <CollapsibleContent className="space-y-2">
-                    {customRanges.map((e, i) => (
+                    {customRanges.value?.map((e, i) => (
                       <div
                         key={i}
                         className={cn(
                           "rounded-md border px-4 py-3 font-mono text-sm",
-                          selectedRanges.find(
+                          selectedRanges.value?.find(
                             (r) => ipRangeStr(e) === ipRangeStr(r)
                           )
                             ? "bg-green-400"
                             : ""
                         )}
                         onClick={() => {
-                          const hasRange = selectedRanges.find(
+                          const hasRange = selectedRanges.value?.find(
                             (r) => ipRangeStr(e) === ipRangeStr(r)
                           );
                           if (hasRange) {
-                            const withoutSelected = selectedRanges.filter(
-                              (r) => ipRangeStr(e) !== ipRangeStr(r)
-                            );
-                            saveSelectedRanges((prev) => [...withoutSelected]);
+                            const withoutSelected =
+                              selectedRanges.value?.filter(
+                                (r) => ipRangeStr(e) !== ipRangeStr(r)
+                              );
+                            selectedRanges.set((prev) => [
+                              ...(withoutSelected ?? []),
+                            ]);
                           } else {
-                            saveSelectedRanges((prev) => [...prev, e]);
+                            selectedRanges.set((prev) => [...(prev ?? []), e]);
                           }
                         }}
                       >
@@ -381,8 +388,8 @@ export default function ScanStats({
             </Button>
           </div>
           <p className="font-mono text-xs">
-            {selectedRanges.length
-              ? `Selected: ${selectedRanges.length}`
+            {selectedRanges.value?.length
+              ? `Selected: ${selectedRanges.value?.length}`
               : "No Range Selected"}
           </p>
         </div>

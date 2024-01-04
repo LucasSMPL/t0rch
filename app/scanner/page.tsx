@@ -2,26 +2,28 @@
 import { Progress } from "@/components/ui/progress";
 
 import { useToast } from "@/components/ui/use-toast";
-import useLocalStorage from "@/hooks/use-local-storage";
 import { useMemo, useState } from "react";
+// import { useLocalStorage } from "usehooks-ts";
+import { useLocalStorageValue } from "@react-hookz/web";
 import ScanTable from "./components/scan-table";
 import ScannerStats from "./components/scanner-stats";
 export default function ScannerPage() {
   const { toast } = useToast();
 
   const [ips, setIps] = useState<ScannedIp[]>([]);
-  const [selectedRanges, saveSelectedRanges] = useLocalStorage<IpRange[]>(
-    "selected-ranges",
-    []
-  );
+  const selectedRanges = useLocalStorageValue<IpRange[]>("selected-ranges", {
+    defaultValue: [],
+    initializeWithValue: false,
+  });
   const [progress, setProgress] = useState<number | null>(null);
   const total = useMemo(
-    () => selectedRanges.reduce((t, c) => t + c.end - c.start + 1, 0),
+    () =>
+      selectedRanges.value?.reduce((t, c) => t + c.end - c.start + 1, 0) ?? 0,
     [selectedRanges]
   );
 
   const startScan = async () => {
-    if (!selectedRanges.length) {
+    if (!selectedRanges.value?.length) {
       return toast({
         title: "Please choose at least one range!",
         variant: "destructive",
@@ -29,10 +31,11 @@ export default function ScannerPage() {
     }
     try {
       setProgress(0);
+      setIps([]);
       const response = await fetch(`http://localhost:7070/scan`, {
         method: "POST",
         body: JSON.stringify({
-          ranges: selectedRanges.map((e) => ({
+          ranges: selectedRanges.value?.map((e) => ({
             start: `${e.address}.${e.start}`,
             end: `${e.address}.${e.end}`,
           })),
@@ -57,6 +60,7 @@ export default function ScannerPage() {
           setProgress((ips.length / total) * 100);
         }
       }
+      reader?.cancel();
     } catch (error) {
       console.error("Error during scan:", error);
     } finally {
