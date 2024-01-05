@@ -1,6 +1,5 @@
 "use client";
 import { Progress } from "@/components/ui/progress";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useMemo, useState } from "react";
 // import { useLocalStorage } from "usehooks-ts";
@@ -89,11 +88,7 @@ export default function ScannerPage() {
           )}
         </div>
       </div>
-      <div className="flex justify-end pb-5">
-      <Button style={{ backgroundColor: "#e94d1b" }} className="mr-4"> Reboot Miner </Button>
-      <Button style={{ backgroundColor: "#e94d1b" }} className="mr-4"> Sleep Miner </Button>
-      <Button style={{ backgroundColor: "#e94d1b" }} > Blink LED </Button>
-      </div>
+
       <ScanTable scannedIps={ips} />
     </div>
   );
