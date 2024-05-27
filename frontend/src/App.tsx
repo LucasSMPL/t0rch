@@ -1,6 +1,8 @@
 import axios from "axios";
 import { QueryClient, QueryClientProvider, useMutation } from "react-query";
 import { Button } from "./components/ui/button";
+import { Card } from "./components/ui/card";
+import { ThemeProvider } from "./components/theme-provider";
 
 const queryClient = new QueryClient();
 
@@ -8,13 +10,16 @@ function App() {
   // const [count, setCount] = useState(0)
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+          <QueryClientProvider client={queryClient}>
       <Scanner />
     </QueryClientProvider>
+    </ThemeProvider>
   );
 }
 
 export default App;
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function scanIps(): Promise<any> {
@@ -41,13 +46,14 @@ function Scanner() {
 
   return (
     <div className="flex justify-center w-full h-full">
-      <Button
+      <Button 
         onClick={() => {
           mutation.mutate();
         }}
       >
         Scan 2
       </Button>
+      <Card>Hello</Card>
     </div>
   );
 }
