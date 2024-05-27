@@ -3,23 +3,23 @@ import { QueryClient, QueryClientProvider, useMutation } from "react-query";
 import { Button } from "./components/ui/button";
 import { Card } from "./components/ui/card";
 import { ThemeProvider } from "./components/theme-provider";
+import ScanStats from "./scanner/scan-stats";
+import ScanTable from "./scanner/scan-table";
 
 const queryClient = new QueryClient();
 
 function App() {
   // const [count, setCount] = useState(0)
-
   return (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
           <QueryClientProvider client={queryClient}>
-      <Scanner />
-    </QueryClientProvider>
+          <Scanner />
+          </QueryClientProvider>
     </ThemeProvider>
   );
 }
 
 export default App;
-
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function scanIps(): Promise<any> {
@@ -45,15 +45,20 @@ function Scanner() {
   });
 
   return (
-    <div className="flex justify-center w-full h-full">
-      <Button 
-        onClick={() => {
-          mutation.mutate();
-        }}
-      >
-        Scan 2
-      </Button>
-      <Card>Hello</Card>
+    <div style={{ marginLeft: "40px", marginRight: "40px" }}>
+      <div className="pt-4" style={{ marginBottom: "20px" }}>
+      <ScanStats
+      lessThan3Count={0}
+      missingFanCount={0}
+      notFoundCount={0}
+      onScan={() => {}}
+      psuFailureCount={0}
+      scanCount={0}
+      underhashingCount={0}
+      />
+      </div>
+      <ScanTable scannedIps={[]}/>
+      <Button onClick={() => { mutation.mutate(); }} style={{ backgroundColor: "#"}}>Start Real Scan</Button>
     </div>
   );
 }
