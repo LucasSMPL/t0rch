@@ -72,7 +72,6 @@ export default function ScanTable({ scannedIps }: { scannedIps: ScannedIp[] }) {
   const [loading, setLoading] = useState(false);
   const [rowSelection, setRowSelection] = useState({});
   const ips = useMemo(() => scannedIps, [scannedIps]);
-  console.log(rowSelection);
 
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});

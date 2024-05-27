@@ -32,14 +32,14 @@ function Scanner() {
       },
       body: JSON.stringify([
         "10.0.131",
-        // "10.0.132",
-        // "10.0.133",
-        // "10.0.134",
-        // "10.0.135",
-        // "10.0.136",
-        // "10.0.137",
-        // "10.0.138",
-        // "10.0.140",
+        "10.0.132",
+        "10.0.133",
+        "10.0.134",
+        "10.0.135",
+        "10.0.136",
+        "10.0.137",
+        "10.0.138",
+        "10.0.140",
       ]),
     });
     const reader = response.body
@@ -48,13 +48,16 @@ function Scanner() {
     if (!reader) return;
     let isDone = false;
     while (!isDone) {
-      const res = await reader?.read();
-      if (res?.done) {
+      const res = await reader.read();
+      if (res.done) {
         isDone = true;
         break;
       }
-      const parsed: ScannedIp = JSON.parse(res.value);
-      setScannedIps((prev) => [...prev, parsed]);
+      const parsed: ScannedIp[] = res.value
+        .split("\n\n")
+        .filter((x) => x)
+        .map((x) => JSON.parse(x));
+      setScannedIps((prev) => [...prev, ...parsed]);
     }
   };
 

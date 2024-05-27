@@ -111,9 +111,9 @@ func scanHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			fmt.Fprintf(w, "%s", jsonData)
-			flusher.Flush()             // Ensure the data is sent to the client immediately
-			time.Sleep(1 * time.Second) // Simulate some delay
+			fmt.Fprintf(w, "%s\n\n", jsonData)
+			fmt.Printf("%s", jsonData)
+			flusher.Flush()
 		}
 	}
 }
@@ -252,26 +252,26 @@ func getMinerSummary(
 
 	res, err := client.Get(fullURL)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return nil
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode >= 300 {
-		fmt.Print(res.Status)
+		fmt.Println(res.Status)
 		return nil
 	}
 
 	resBytes, err := io.ReadAll(res.Body)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return nil
 	}
 
 	var ipSummary IpSummary
 	err = json.Unmarshal(resBytes, &ipSummary)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return nil
 	}
 
@@ -289,26 +289,26 @@ func getMinerStats(
 
 	res, err := client.Get(fullURL)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return nil
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode >= 300 {
-		fmt.Print(res.Status)
+		fmt.Println(res.Status)
 		return nil
 	}
 
 	resBytes, err := io.ReadAll(res.Body)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return nil
 	}
 
 	var ipStats IpStats
 	err = json.Unmarshal(resBytes, &ipStats)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return nil
 	}
 
@@ -326,26 +326,26 @@ func getMinerConf(
 
 	res, err := client.Get(fullURL)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return nil
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode >= 300 {
-		fmt.Print(res.Status)
+		fmt.Println(res.Status)
 		return nil
 	}
 
 	resBytes, err := io.ReadAll(res.Body)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return nil
 	}
 
 	var ipMinerConf IpMinerConf
 	err = json.Unmarshal(resBytes, &ipMinerConf)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return nil
 	}
 
@@ -363,19 +363,19 @@ func getMinerLogs(
 
 	res, err := client.Get(fullURL)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return nil
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode >= 300 {
-		fmt.Print(res.Status)
+		fmt.Println(res.Status)
 		return nil
 	}
 
 	resBytes, err := io.ReadAll(res.Body)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return nil
 	}
 
@@ -419,7 +419,7 @@ func getMinerModels() *[]MinerModel {
 
 	resBytes, err := io.ReadAll(res.Body)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return nil
 	}
 
@@ -428,7 +428,7 @@ func getMinerModels() *[]MinerModel {
 	var models []MinerModel
 	err = json.Unmarshal(resBytes, &models)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return nil
 	}
 
