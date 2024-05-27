@@ -1,20 +1,54 @@
 import { ColumnHeader, Pagination, Toolbar } from "@/components/data-table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
-import { ColumnDef, ColumnFiltersState, SortingState, VisibilityState, flexRender, getCoreRowModel, getFacetedRowModel, getFacetedUniqueValues, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable, } from "@tanstack/react-table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  ColumnDef,
+  ColumnFiltersState,
+  SortingState,
+  VisibilityState,
+  flexRender,
+  getCoreRowModel,
+  getFacetedRowModel,
+  getFacetedUniqueValues,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import axios from "axios";
 // import { formatDistance } from "date-fns";
-import { CreditCardIcon, Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useToast } from "@/components/ui/use-toast";
+import { Filter } from "lucide-react";
 import * as React from "react";
 import { useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from "@/components/ui/card";
-import { useToast } from "@/components/ui/use-toast";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Separator } from "@/components/ui/separator";
-import { Label } from "@/components/ui/label";
 import { HashrateChart } from "./hashrate-chart";
 
 // Define the ScannedIp type
@@ -82,97 +116,95 @@ export default function ScanTable({ scannedIps }: { scannedIps: ScannedIp[] }) {
           <CardDescription>t0rch is in beta, launching 2024.</CardDescription>
         </div>
         <div className="flex justify-end pb-5">
-        <Button style={{ backgroundColor: "#e94d1b" }} className="mr-4">
+          <Button style={{ backgroundColor: "#e94d1b" }} className="mr-4">
             Reboot All
-        </Button>
-        <Button style={{ backgroundColor: "#e94d1b" }} className="mr-4">
+          </Button>
+          <Button style={{ backgroundColor: "#e94d1b" }} className="mr-4">
             Config All
-        </Button>
-        <Sheet>
-        <Button asChild variant={"outline"} className="mr-4">
-        <SheetTrigger>Miner Details</SheetTrigger>
-        </Button>
-        <SheetContent className="w-[400px] sm:w-[540px] overflow-scroll">
-        <CardContent className="p-6 text-sm">
-          <HashrateChart />
-            <div className="grid gap-3">
-              <ul className="grid gap-3">
-                <li className="flex items-center justify-between">
-                  <span className="text-muted-foreground">
-                    Antminer S21 Pro
-                  </span>
-                  <span>219 / 220 TH/S</span>
-                </li>
-                <li className="flex items-center justify-between">
-                  <span>
-                    Control Board:
-                  </span>
-                  <span className="text-muted-foreground">Xilinx</span>
-                </li>
-                <li className="flex items-center justify-between">
-                  <span>
-                    Hashboards:
-                  </span>
-                  <span className="text-muted-foreground">BHB4261</span>
-                </li>
-                <li className="flex items-center justify-between">
-                  <span>
-                    PSU:
-                  </span>
-                  <span className="text-muted-foreground">APW12-15c</span>
-                </li>
-              </ul>
-              <Separator className="my-2" />
-              <ul className="grid gap-3">
-                <li className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Pool 1:</span>
-                  <span>Luxor</span>
-                </li>
-                <li className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Pool 2:</span>
-                  <span>Nicehash</span>
-                </li>
-                <li className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Pool 3:</span>
-                  <span>Braiins</span>
-                </li>
-              </ul>
-              <Separator className="my-2" />
-              <ul className="grid gap-3">
-                <li className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Worker 1:</span>
-                  <span>adamhaynes.1</span>
-                </li>
-                <li className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Worker 2:</span>
-                  <span>adamhaynes.2</span>
-                </li>
-                <li className="flex items-center justify-between">
-                  <span className="text-muted-foreground">Worker 3:</span>
-                  <span>adamhaynes.3</span>
-                </li>
-              </ul>
-            </div>
-            <Separator className="my-4" />
-            <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col gap-3">
-              <Button>Reboot</Button>
-            </div>
-            <div className="flex flex-col gap-3">
-              <Button>Create Repair Ticket</Button>
-            </div>
-            <div className="flex flex-col gap-3">
-              <Button style={{ backgroundColor: "#e94d1b" }}>Change Pools</Button>
-            </div>
-            <div className="flex flex-col gap-3">
-              <Button style={{ backgroundColor: "#e94d1b" }}>IP Settings</Button>
-            </div>
-          </div>
-          </CardContent>
-        </SheetContent>
-      </Sheet>
+          </Button>
+          <Sheet>
+            <Button asChild variant={"outline"} className="mr-4">
+              <SheetTrigger>Miner Details</SheetTrigger>
+            </Button>
+            <SheetContent className="w-[400px] sm:w-[540px] overflow-scroll">
+              <CardContent className="p-6 text-sm">
+                <HashrateChart />
+                <div className="grid gap-3">
+                  <ul className="grid gap-3">
+                    <li className="flex items-center justify-between">
+                      <span className="text-muted-foreground">
+                        Antminer S21 Pro
+                      </span>
+                      <span>219 / 220 TH/S</span>
+                    </li>
+                    <li className="flex items-center justify-between">
+                      <span>Control Board:</span>
+                      <span className="text-muted-foreground">Xilinx</span>
+                    </li>
+                    <li className="flex items-center justify-between">
+                      <span>Hashboards:</span>
+                      <span className="text-muted-foreground">BHB4261</span>
+                    </li>
+                    <li className="flex items-center justify-between">
+                      <span>PSU:</span>
+                      <span className="text-muted-foreground">APW12-15c</span>
+                    </li>
+                  </ul>
+                  <Separator className="my-2" />
+                  <ul className="grid gap-3">
+                    <li className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Pool 1:</span>
+                      <span>Luxor</span>
+                    </li>
+                    <li className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Pool 2:</span>
+                      <span>Nicehash</span>
+                    </li>
+                    <li className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Pool 3:</span>
+                      <span>Braiins</span>
+                    </li>
+                  </ul>
+                  <Separator className="my-2" />
+                  <ul className="grid gap-3">
+                    <li className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Worker 1:</span>
+                      <span>adamhaynes.1</span>
+                    </li>
+                    <li className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Worker 2:</span>
+                      <span>adamhaynes.2</span>
+                    </li>
+                    <li className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Worker 3:</span>
+                      <span>adamhaynes.3</span>
+                    </li>
+                  </ul>
+                </div>
+                <Separator className="my-4" />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-3">
+                    <Button>Reboot</Button>
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <Button>Create Repair Ticket</Button>
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <Button style={{ backgroundColor: "#e94d1b" }}>
+                      Change Pools
+                    </Button>
+                  </div>
+                  <div className="flex flex-col gap-3">
+                    <Button style={{ backgroundColor: "#e94d1b" }}>
+                      IP Settings
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </SheetContent>
+          </Sheet>
 
-        <Button
+          <Button
             className="mr-4"
             variant="outline"
             disabled={loading}
@@ -206,57 +238,70 @@ export default function ScanTable({ scannedIps }: { scannedIps: ScannedIp[] }) {
             Sleep Miner
           </Button>
           <Dialog>
-      <DialogTrigger>
-        <Button variant="outline" className="mr-4">Firmware Upgrade</Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[450px]">
-        <DialogHeader>
-          <DialogTitle>Upgrade Antminer Firmware</DialogTitle>
-          <DialogDescription>Please select the firmware file to upload to selected Antminer.</DialogDescription>
-        </DialogHeader>
-        <div className="grid grid-cols-1 gap-4 py-4">
-          <div className="flex flex-col space-y-1.5">
-            <Label htmlFor="file">File Upload </Label>
-            <Input className="w-full" id="file" type="file" style={{ backgroundColor: "#e94d1b"}}/>
-          </div>
-        </div>
-        <DialogFooter className="justify-center">
-          <Button className="mx-auto">Update</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-            <Dialog>
-    <DialogTrigger>
-      <Button variant="outline" className="mr-4">Change Pools</Button>
-    </DialogTrigger>
-    <DialogContent className="sm:max-w-[850px]">
-      <DialogHeader>
-        <DialogTitle>Changing Pools</DialogTitle>
-        <DialogDescription>
-          Please enter your stratum url, worker/account, and password below.
-        </DialogDescription>
-      </DialogHeader>
-      <div className="grid grid-cols-12 gap-4 py-4">
-        <Input className="col-span-6" placeholder="Stratum URL #1" />
-        <Input className="col-span-4" placeholder="Worker" />
-        <Input className="col-span-2" placeholder="Password" />
-      </div>
-      <div className="grid grid-cols-12 gap-4 py-4">
-        <Input className="col-span-6" placeholder="Stratum URL #2" />
-        <Input className="col-span-4" placeholder="Worker" />
-        <Input className="col-span-2" placeholder="Password" />
-      </div>
-      <div className="grid grid-cols-12 gap-4 py-4">
-        <Input className="col-span-6" placeholder="Stratum URL #3" />
-        <Input className="col-span-4" placeholder="Worker" />
-        <Input className="col-span-2" placeholder="Password" />
-      </div>
-      <DialogFooter className="flex justify-center items-center">
-      <Button className="mx-auto">Update Pool</Button>
-    </DialogFooter>
-    </DialogContent>
-  </Dialog>
-  <Button
+            <DialogTrigger>
+              <Button variant="outline" className="mr-4">
+                Firmware Upgrade
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[450px]">
+              <DialogHeader>
+                <DialogTitle>Upgrade Antminer Firmware</DialogTitle>
+                <DialogDescription>
+                  Please select the firmware file to upload to selected
+                  Antminer.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-1 gap-4 py-4">
+                <div className="flex flex-col space-y-1.5">
+                  <Label htmlFor="file">File Upload </Label>
+                  <Input
+                    className="w-full"
+                    id="file"
+                    type="file"
+                    style={{ backgroundColor: "#e94d1b" }}
+                  />
+                </div>
+              </div>
+              <DialogFooter className="justify-center">
+                <Button className="mx-auto">Update</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Dialog>
+            <DialogTrigger>
+              <Button variant="outline" className="mr-4">
+                Change Pools
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[850px]">
+              <DialogHeader>
+                <DialogTitle>Changing Pools</DialogTitle>
+                <DialogDescription>
+                  Please enter your stratum url, worker/account, and password
+                  below.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-12 gap-4 py-4">
+                <Input className="col-span-6" placeholder="Stratum URL #1" />
+                <Input className="col-span-4" placeholder="Worker" />
+                <Input className="col-span-2" placeholder="Password" />
+              </div>
+              <div className="grid grid-cols-12 gap-4 py-4">
+                <Input className="col-span-6" placeholder="Stratum URL #2" />
+                <Input className="col-span-4" placeholder="Worker" />
+                <Input className="col-span-2" placeholder="Password" />
+              </div>
+              <div className="grid grid-cols-12 gap-4 py-4">
+                <Input className="col-span-6" placeholder="Stratum URL #3" />
+                <Input className="col-span-4" placeholder="Worker" />
+                <Input className="col-span-2" placeholder="Password" />
+              </div>
+              <DialogFooter className="flex justify-center items-center">
+                <Button className="mx-auto">Update Pool</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Button
             style={{ backgroundColor: "#e94d1b" }}
             className="mr-4"
             disabled={loading}
@@ -351,7 +396,7 @@ export default function ScanTable({ scannedIps }: { scannedIps: ScannedIp[] }) {
 // Temperature
 // Firmware Version
 
-export const TodoColumns: ColumnDef<ScannedIp>[] = [
+const TodoColumns: ColumnDef<ScannedIp>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -443,9 +488,7 @@ export const TodoColumns: ColumnDef<ScannedIp>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
-          <span className="truncate font-medium">
-            {row.original.uptime}
-          </span>
+          <span className="truncate font-medium">{row.original.uptime}</span>
         </div>
       );
     },

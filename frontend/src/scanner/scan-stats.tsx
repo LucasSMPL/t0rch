@@ -1,17 +1,41 @@
-"use client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger, } from "@/components/ui/sheet";
-import { useToast } from "@/components/ui/use-toast";
-import { ArrowBigDownDash, ChevronsUpDown, FireExtinguisher, Flame, FlameKindling, HelpCircle, Radar, ZapOff, } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  ArrowBigDownDash,
+  ChevronsUpDown,
+  FireExtinguisher,
+  Flame,
+  FlameKindling,
+  HelpCircle,
+  Radar,
+  ZapOff,
+} from "lucide-react";
 
-import { CheckedState } from "@radix-ui/react-checkbox";
-import { ChangeEvent, useRef, useState } from "react";
+import { useRef, useState } from "react";
 // import { z } from "zod";
 
 export default function ScanStats({
@@ -20,7 +44,7 @@ export default function ScanStats({
   underhashingCount,
   lessThan3Count,
   missingFanCount,
-  notFoundCount,
+  // notFoundCount,
   psuFailureCount,
 }: {
   onScan: () => void;
@@ -35,7 +59,7 @@ export default function ScanStats({
   const addressRef = useRef<HTMLInputElement | null>(null);
   const startRef = useRef<HTMLInputElement | null>(null);
   const endRef = useRef<HTMLInputElement | null>(null);
-  const { toast } = useToast();
+  // const { toast } = useToast();
   const [open, setOpen] = useState(false);
 
   return (
@@ -48,13 +72,17 @@ export default function ScanStats({
         </h3>
         <div className="flex flex-col p-4 space-x-4 space-y-2">
           <div className="flex flex-row justify-end">
-{/* coral: FF4433 yellow: FFEA00 */}
-          <Button style={{ backgroundColor: "#49de80", marginRight: "25px" }}>
-            <ZapOff className="mr-2"/>
+            {/* coral: FF4433 yellow: FFEA00 */}
+            <Button style={{ backgroundColor: "#49de80", marginRight: "25px" }}>
+              <ZapOff className="mr-2" />
               LOAD SHED
             </Button>
             <Sheet>
-              <Button style={{ marginRight: "25px" }} asChild variant={"outline"}>
+              <Button
+                style={{ marginRight: "25px" }}
+                asChild
+                variant={"outline"}
+              >
                 <SheetTrigger>Configure Network</SheetTrigger>
               </Button>
               <SheetContent className="min-w-[600px] sm:w-[540px] overflow-scroll">
@@ -100,9 +128,7 @@ export default function ScanStats({
                         </div>
                       </div>
                       <DialogFooter>
-                        <Button
-                          type="button"
-                          variant="secondary">
+                        <Button type="button" variant="secondary">
                           Add
                         </Button>
                       </DialogFooter>
@@ -112,9 +138,7 @@ export default function ScanStats({
                 <Collapsible className="min-w-[350px] space-y-2">
                   <div className="flex items-center justify-between space-x-4 px-4">
                     <div className="flex flex-row items-center">
-                      <Checkbox
-                        className="mx-2"
-                      />
+                      <Checkbox className="mx-2" />
                       <h4 className="text-sm font-semibold">
                         Pre-defined for CFU
                       </h4>
@@ -126,18 +150,13 @@ export default function ScanStats({
                       </Button>
                     </CollapsibleTrigger>
                   </div>
-                  <CollapsibleContent className="space-y-2">
-                  </CollapsibleContent>
+                  <CollapsibleContent className="space-y-2"></CollapsibleContent>
                 </Collapsible>
                 <Collapsible className="min-w-[350px] space-y-2">
                   <div className="flex items-center justify-between space-x-4 px-4">
                     <div className="flex flex-row items-center">
-                      <Checkbox
-                        className="mx-2"
-                      />
-                      <h4 className="text-sm font-semibold">
-                        Custom 
-                      </h4>
+                      <Checkbox className="mx-2" />
+                      <h4 className="text-sm font-semibold">Custom</h4>
                     </div>
                     <CollapsibleTrigger asChild>
                       <Button variant="ghost" size="sm" className="w-9 p-0">
@@ -146,8 +165,7 @@ export default function ScanStats({
                       </Button>
                     </CollapsibleTrigger>
                   </div>
-                  <CollapsibleContent className="space-y-2">
-                  </CollapsibleContent>
+                  <CollapsibleContent className="space-y-2"></CollapsibleContent>
                 </Collapsible>
               </SheetContent>
             </Sheet>

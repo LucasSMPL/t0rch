@@ -1,19 +1,19 @@
 package main
 
 type ScannedIp struct {
-	Ip             string
-	MinerType      string
-	Worker         string
-	Uptime         int
-	Hashrate       float64
-	FanCount       int
-	HbCount        int
-	PowerType      string
-	Controller     string
-	IsUnderhashing bool
-	IsFound        bool
-	HashboardType  string
-	PsuFailure     bool
+	Ip             string  `json:"ip"`
+	MinerType      string  `json:"miner_type"`
+	Worker         string  `json:"worker"`
+	Uptime         int     `json:"uptime"`
+	Hashrate       float64 `json:"hashrate"`
+	FanCount       int     `json:"fan_count"`
+	HbCount        int     `json:"hb_count"`
+	PowerType      string  `json:"power_type"`
+	Controller     string  `json:"controller"`
+	HashboardType  string  `json:"hashboard_type"`
+	IsUnderhashing bool    `json:"is_underhashing"`
+	ModelFound     bool    `json:"model_found"`
+	PsuFailure     bool    `json:"psu_failure"`
 }
 
 type IpSummary struct {
@@ -87,4 +87,34 @@ type IpStats struct {
 			Hwp          float64 `json:"hwp"`
 		} `json:"chain"`
 	} `json:"STATS"`
+}
+
+type IpMinerConf struct {
+	Pools []struct {
+		Url  string `json:"url"`
+		User string `json:"user"`
+		Pass string `json:"pass"`
+	} `json:"pools"`
+	ApiListen        bool   `json:"api-listen"`
+	ApiNetwork       bool   `json:"api-network"`
+	ApiGroups        string `json:"api-groups"`
+	ApiAllow         string `json:"api-allow"`
+	BitmainFanCtrl   bool   `json:"bitmain-fan-ctrl"`
+	BitmainFanPwm    string `json:"bitmain-fan-pwm"`
+	BitmainUseVil    bool   `json:"bitmain-use-vil"`
+	BitmainFreq      string `json:"bitmain-freq"`
+	BitmainVoltage   string `json:"bitmain-voltage"`
+	BitmainCcdelay   string `json:"bitmain-ccdelay"`
+	BitmainPwth      string `json:"bitmain-pwth"`
+	BitmainWorkMode  string `json:"bitmain-work-mode"`
+	BitmainFreqLevel string `json:"bitmain-freq-level"`
+}
+
+type MinerModel struct {
+	Id             int     `json:"id"`
+	Name           string  `json:"name"`
+	Model          string  `json:"model"`
+	IdManufacturer int     `json:"id_manufacturer"`
+	HashRate       float64 `json:"hashrate"`
+	Power          float64 `json:"power"`
 }

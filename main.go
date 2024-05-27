@@ -9,6 +9,8 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"regexp"
+	"strings"
 	"sync"
 	"time"
 
@@ -49,7 +51,6 @@ func scanHandler(w http.ResponseWriter, r *http.Request) {
 
 	if len(ipBases) == 0 {
 		http.Error(w, "No IP Bases Provided", http.StatusBadRequest)
-		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	log.Printf("Scanning: %v", ipBases)
@@ -70,35 +71,55 @@ func scanHandler(w http.ResponseWriter, r *http.Request) {
 			parsedIp := net.ParseIP(ip)
 			if parsedIp == nil {
 				http.Error(w, "Invalid Bases Provided", http.StatusBadRequest)
-				w.WriteHeader(http.StatusBadRequest)
 				return
 			}
 			ips = append(ips, parsedIp)
 		}
 	}
 
+	models := getMinerModels()
+	if models == nil {
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
 	resCh := make(chan *ScannedIp)
 
 	go func() {
-		scanAllIps(client, ips, resCh)
+		scanAllIps(client, ips, resCh, *models)
 		close(resCh)
 	}()
 
-	var scannedIps []*ScannedIp
-	for r := range resCh {
-		if r != nil {
-			scannedIps = append(scannedIps, r)
-		}
+	// Set headers for SSE
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+
+	// Flush the headers to the client
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "Streaming unsupported", http.StatusInternalServerError)
+		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(scannedIps); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+	// stream of scanned IPs
+	for r := range resCh {
+		if r != nil {
+			jsonData, err := json.Marshal(r)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			fmt.Fprintf(w, "%s", jsonData)
+			flusher.Flush()             // Ensure the data is sent to the client immediately
+			time.Sleep(1 * time.Second) // Simulate some delay
+		}
 	}
 }
 
-func scanAllIps(client *http.Client, ips []net.IP, resCh chan<- *ScannedIp) {
+func scanAllIps(client *http.Client, ips []net.IP, resCh chan<- *ScannedIp, models []MinerModel) {
+
 	wg := sync.WaitGroup{}
 	concurrencyLimit := 200
 	semaphore := make(chan struct{}, concurrencyLimit)
@@ -109,7 +130,7 @@ func scanAllIps(client *http.Client, ips []net.IP, resCh chan<- *ScannedIp) {
 		go func(ip net.IP) {
 			defer wg.Done()
 			defer func() { <-semaphore }()
-			scanRes := getMinerData(client, ip)
+			scanRes := getMinerData(client, ip, models)
 			resCh <- scanRes
 		}(ip)
 	}
@@ -121,6 +142,7 @@ func scanAllIps(client *http.Client, ips []net.IP, resCh chan<- *ScannedIp) {
 func getMinerData(
 	client *http.Client,
 	ip net.IP,
+	models []MinerModel,
 ) *ScannedIp {
 
 	ipSummary := getMinerSummary(client, ip)
@@ -133,6 +155,37 @@ func getMinerData(
 		return nil
 	}
 
+	ipLogs := getMinerLogs(client, ip)
+	if ipLogs == nil {
+		return nil
+	}
+
+	ipConf := getMinerConf(client, ip)
+	if ipConf == nil {
+		return nil
+	}
+
+	hashrate := 0.0
+	for _, e := range models {
+		if e.Name == ipSummary.Info.Type {
+			hashrate = e.HashRate
+			break
+		}
+	}
+
+	worker := ""
+	if len(ipConf.Pools) > 0 {
+		worker = ipConf.Pools[0].User
+	}
+	elapsed := 0
+	rate5s := 0.0
+	isUnderhashing := false
+	if len(ipSummary.Summary) > 0 {
+		elapsed = ipSummary.Summary[0].Elapsed
+		rate5s = ipSummary.Summary[0].Rate_5s
+		isUnderhashing = (rate5s / 1000) < (float64(hashrate) * 0.8)
+	}
+
 	fanNum := 0
 	chainNum := 0
 	if len(ipStats.Stats) > 0 {
@@ -140,19 +193,51 @@ func getMinerData(
 		chainNum = ipStats.Stats[0].ChainNum
 	}
 
+	controller := "N/A"
+	powerType := "Unknown"
+	hbType := "Unknown"
+	psuFailure := false
+
+	controllerKeywords := []string{"Xilinx", "amlogic", "BeagleBone"}
+	c := ContainsAny(*ipLogs, controllerKeywords)
+	if c != "" {
+		controller = c
+	}
+
+	psuFailingKeywords := []string{"power voltage can not meet the target", "ERROR_POWER_LOST", "stop_mining: get power type version failed!"}
+	if isUnderhashing {
+		p := ContainsAny(*ipLogs, psuFailingKeywords)
+		if p != "" {
+			psuFailure = true
+		}
+	}
+
+	powerRgx := regexp.MustCompile("power type version: (0x0-9[a-fA-F]+)")
+	searchRes := strings.Split(powerRgx.FindString(*ipLogs), " ")
+	if len(searchRes) >= 4 {
+		powerType = searchRes[3]
+	}
+
+	hbModelRgx := regexp.MustCompile("load machine (.*?) conf")
+	searchRes = strings.Split(hbModelRgx.FindString(*ipLogs), " ")
+	if len(searchRes) >= 4 {
+		hbType = searchRes[2]
+	}
+
 	scannedIp := ScannedIp{
 		Ip:             ip.String(),
 		MinerType:      ipSummary.Info.Type,
-		Worker:         "",
-		Uptime:         0,
-		Hashrate:       0,
+		Worker:         worker,
+		Uptime:         elapsed,
+		Hashrate:       rate5s,
 		FanCount:       fanNum,
 		HbCount:        chainNum,
-		PowerType:      "",
-		Controller:     "",
-		IsUnderhashing: false,
-		HashboardType:  "",
-		PsuFailure:     false,
+		PowerType:      powerType,
+		Controller:     controller,
+		IsUnderhashing: isUnderhashing,
+		HashboardType:  hbType,
+		PsuFailure:     psuFailure,
+		ModelFound:     hashrate != 0.0,
 	}
 
 	return &scannedIp
@@ -230,4 +315,124 @@ func getMinerStats(
 	io.Copy(io.Discard, res.Body)
 
 	return &ipStats
+}
+
+func getMinerConf(
+	client *http.Client,
+	ip net.IP,
+) *IpMinerConf {
+	apiEndpoint := "/cgi-bin/get_miner_conf.cgi"
+	fullURL := fmt.Sprintf("http://%s%s", ip, apiEndpoint)
+
+	res, err := client.Get(fullURL)
+	if err != nil {
+		fmt.Print(err)
+		return nil
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode >= 300 {
+		fmt.Print(res.Status)
+		return nil
+	}
+
+	resBytes, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Print(err)
+		return nil
+	}
+
+	var ipMinerConf IpMinerConf
+	err = json.Unmarshal(resBytes, &ipMinerConf)
+	if err != nil {
+		fmt.Print(err)
+		return nil
+	}
+
+	io.Copy(io.Discard, res.Body)
+
+	return &ipMinerConf
+}
+
+func getMinerLogs(
+	client *http.Client,
+	ip net.IP,
+) *string {
+	apiEndpoint := "/cgi-bin/log.cgi"
+	fullURL := fmt.Sprintf("http://%s%s", ip, apiEndpoint)
+
+	res, err := client.Get(fullURL)
+	if err != nil {
+		fmt.Print(err)
+		return nil
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode >= 300 {
+		fmt.Print(res.Status)
+		return nil
+	}
+
+	resBytes, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Print(err)
+		return nil
+	}
+
+	io.Copy(io.Discard, res.Body)
+
+	resString := string(resBytes)
+
+	return &resString
+}
+
+func ContainsAny(s string, substrings []string) string {
+	for _, sub := range substrings {
+		if strings.Contains(s, sub) {
+			return sub
+		}
+	}
+	return ""
+}
+
+func getMinerModels() *[]MinerModel {
+	url := "https://conqcdxbczhqszglmwyk.supabase.co/rest/v1/miner_models?select=*"
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		fmt.Println("Error creating request:", err)
+		return nil
+	}
+
+	apiKey := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNvbnFjZHhiY3pocXN6Z2xtd3lrIiwicm9sZSI6ImFub24iLCJpYXQiOjE2Nzk4NjM0NDQsImV4cCI6MTk5NTQzOTQ0NH0.LNi12BRKMOOmqW396mjgm_wgJp79U-Ie994EyLlfxnc"
+
+	req.Header.Set("apikey", apiKey)
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", apiKey))
+
+	client := &http.Client{}
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Println("Error making request:", err)
+		return nil
+	}
+	defer res.Body.Close()
+
+	resBytes, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Print(err)
+		return nil
+	}
+
+	fmt.Printf("%s", resBytes)
+
+	var models []MinerModel
+	err = json.Unmarshal(resBytes, &models)
+	if err != nil {
+		fmt.Print(err)
+		return nil
+	}
+
+	io.Copy(io.Discard, res.Body)
+
+	return &models
 }
