@@ -21,6 +21,10 @@ function App() {
 export default App;
 
 function Scanner() {
+  const [banner, ] = useState({
+    message: "There is a curtailment scheduled: Tuesday - 8:00pm to 9:15pm!",
+    visible: true 
+  });
   const ipBases = [
     "10.0.131",
     "10.0.132",
@@ -68,7 +72,12 @@ function Scanner() {
   };
 
   return (
-    <>
+    <div className="flex flex-col h-screen overflow-hidden">
+        {banner.visible && (
+          <div className="text-center py-4 border" style={{ backgroundColor: "#0a0a0a", color: "#ffffff", borderColor: "#5D3FD3" }}>
+          {banner.message}
+        </div>
+        )}
       <LoadingBar
         color="#e94d1b"
         progress={progress}
@@ -101,6 +110,6 @@ function Scanner() {
         </div>
         <ScanTable scannedIps={scannedIps.filter((x) => x.is_found)} />
       </div>
-    </>
+    </div>
   );
 }
