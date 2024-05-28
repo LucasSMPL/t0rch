@@ -284,7 +284,7 @@ export default function ScanTable({ table }: { table: tTable<ScannedIp> }) {
       <CardContent>
         <div className="space-y-4">
           <Toolbar table={table} searchColumnId={"worker"} />
-          <div className="rounded-md border max-h-[calc(100vh-560px)] overflow-scroll">
+          <div className="rounded-md border max-h-[calc(100vh-560px)] overflow-auto">
             <Table className="h-full">
               <TableHeader className="sticky top-0">
                 {table.getHeaderGroups().map((headerGroup) => (

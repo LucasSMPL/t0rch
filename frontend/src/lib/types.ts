@@ -14,3 +14,8 @@ export type ScannedIp = {
   model_found: boolean;
   psu_failure: boolean;
 };
+
+export type CustomBase = {
+  name: string;
+  base: string;
+};

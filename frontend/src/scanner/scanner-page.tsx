@@ -10,6 +10,7 @@ import {
   Radar,
 } from "lucide-react";
 
+import useLocalStorage from "@/hooks/use-local-storage";
 import {
   ColumnFiltersState,
   SortingState,
@@ -187,17 +188,7 @@ const Header = ({
 }: {
   setScannedIps: React.Dispatch<React.SetStateAction<ScannedIp[]>>;
 }) => {
-  const ipBases = [
-    "10.0.131",
-    "10.0.132",
-    "10.0.133",
-    "10.0.134",
-    "10.0.135",
-    "10.0.136",
-    "10.0.137",
-    "10.0.138",
-    "10.0.140",
-  ];
+  const selectedBases = useLocalStorage<string[]>("selected-ip-bases", []);
 
   const [progress, setProgress] = useState(0);
 
@@ -208,7 +199,7 @@ const Header = ({
       headers: {
         "Content-Type": "text/event-stream",
       },
-      body: JSON.stringify(ipBases),
+      body: JSON.stringify(selectedBases.value),
     });
     const reader = response.body
       ?.pipeThrough(new TextDecoderStream())
@@ -228,7 +219,8 @@ const Header = ({
         .map((x) => JSON.parse(x));
       setScannedIps((prev) => [...prev, ...parsed]);
       setProgress(
-        (prev) => prev + (parsed.length / (ipBases.length * 255)) * 100
+        (prev) =>
+          prev + (parsed.length / (selectedBases.value.length * 255)) * 100
       );
     }
   };
