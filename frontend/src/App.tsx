@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { ThemeProvider } from "./components/theme-provider";
-import { Button } from "./components/ui/button";
+
 import { ScannedIp } from "./lib/types";
 import ScanStats from "./scanner/scan-stats";
 import ScanTable from "./scanner/scan-table";
-import { ModeToggle } from "./components/mode-toggle";
+
 import { Progress } from "./components/ui/progress";
 
 const queryClient = new QueryClient();
@@ -107,8 +107,6 @@ function Scanner() {
         </div>
       </div>
       <ScanTable scannedIps={scannedIps} />
-      {/* <Button onClick={handleButtonClick}>Scan</Button>
-      <ModeToggle /> */}
     </div>
   );
 }
