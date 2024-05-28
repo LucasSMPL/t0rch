@@ -83,7 +83,7 @@ func scanHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resCh := make(chan *ScannedIp)
+	resCh := make(chan ScannedIp)
 
 	go func() {
 		scanAllIps(client, ips, resCh, *models)
@@ -104,21 +104,18 @@ func scanHandler(w http.ResponseWriter, r *http.Request) {
 
 	// stream of scanned IPs
 	for r := range resCh {
-		if r != nil {
-			jsonData, err := json.Marshal(r)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			fmt.Fprintf(w, "%s\n\n", jsonData)
-			fmt.Printf("%s", jsonData)
-			flusher.Flush()
+		jsonData, err := json.Marshal(r)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
+		fmt.Fprintf(w, "%s\n\n", jsonData)
+		fmt.Printf("%s", jsonData)
+		flusher.Flush()
 	}
 }
 
-func scanAllIps(client *http.Client, ips []net.IP, resCh chan<- *ScannedIp, models []MinerModel) {
+func scanAllIps(client *http.Client, ips []net.IP, resCh chan<- ScannedIp, models []MinerModel) {
 
 	wg := sync.WaitGroup{}
 	concurrencyLimit := 200
@@ -143,26 +140,38 @@ func getMinerData(
 	client *http.Client,
 	ip net.IP,
 	models []MinerModel,
-) *ScannedIp {
+) ScannedIp {
 
 	ipSummary := getMinerSummary(client, ip)
 	if ipSummary == nil {
-		return nil
+		return ScannedIp{
+			Ip:      ip.String(),
+			IsFound: false,
+		}
 	}
 
 	ipStats := getMinerStats(client, ip)
 	if ipStats == nil {
-		return nil
+		return ScannedIp{
+			Ip:      ip.String(),
+			IsFound: false,
+		}
 	}
 
 	ipLogs := getMinerLogs(client, ip)
 	if ipLogs == nil {
-		return nil
+		return ScannedIp{
+			Ip:      ip.String(),
+			IsFound: false,
+		}
 	}
 
 	ipConf := getMinerConf(client, ip)
 	if ipConf == nil {
-		return nil
+		return ScannedIp{
+			Ip:      ip.String(),
+			IsFound: false,
+		}
 	}
 
 	hashrate := 0.0
@@ -226,6 +235,7 @@ func getMinerData(
 
 	scannedIp := ScannedIp{
 		Ip:             ip.String(),
+		IsFound:        true,
 		MinerType:      ipSummary.Info.Type,
 		Worker:         worker,
 		Uptime:         elapsed,
@@ -240,7 +250,7 @@ func getMinerData(
 		ModelFound:     hashrate != 0.0,
 	}
 
-	return &scannedIp
+	return scannedIp
 }
 
 func getMinerSummary(

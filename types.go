@@ -2,6 +2,7 @@ package main
 
 type ScannedIp struct {
 	Ip             string  `json:"ip"`
+	IsFound        bool    `json:"is_found"`
 	MinerType      string  `json:"miner_type"`
 	Worker         string  `json:"worker"`
 	Uptime         int     `json:"uptime"`

@@ -1,5 +1,6 @@
 export type ScannedIp = {
   ip: string;
+  is_found: boolean;
   miner_type: string;
   worker: string;
   uptime: number;

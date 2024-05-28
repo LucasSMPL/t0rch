@@ -82,7 +82,7 @@ export default function ScanTable({ scannedIps }: { scannedIps: ScannedIp[] }) {
 
   const table = useReactTable({
     data: ips,
-    columns: TodoColumns,
+    columns: columns,
     state: {
       sorting,
       columnVisibility,
@@ -387,7 +387,7 @@ export default function ScanTable({ scannedIps }: { scannedIps: ScannedIp[] }) {
                 ) : (
                   <TableRow>
                     <TableCell
-                      colSpan={TodoColumns.length}
+                      colSpan={columns.length}
                       className="h-24 text-center"
                     >
                       No results.
@@ -404,10 +404,7 @@ export default function ScanTable({ scannedIps }: { scannedIps: ScannedIp[] }) {
   );
 }
 
-// Temperature
-// Firmware Version
-
-const TodoColumns: ColumnDef<ScannedIp>[] = [
+const columns: ColumnDef<ScannedIp>[] = [
   {
     id: "select",
     header: ({ table }) => (
