@@ -10,8 +10,9 @@ import {
 
 const data = [
   {
-    average: 400,
-    today: 240,
+    chain1: 400, // Find Real Values in Gigahash, Display in TH ideally. S19 series around 30-40 TH per board. Total of 100+ TH.
+    chain2: 240, // Find Real Values in Gigahash, Display in TH ideally. S19 series around 30-40 TH per board. Total of 100+ TH.
+    chain3: 110, // Find Real Values in Gigahash, Display in TH ideally. S19 series around 30-40 TH per board. Total of 100+ TH.
   },
   {
     average: 300,
@@ -118,7 +119,7 @@ export function HashrateChart() {
   );
 }
 
-// NOTE: THIS MINER-DETAILS.tsx WILL NEED PROPERLY SETUP.
+// NOTE: THIS Hashrate-Chart.tsx WILL NEED PROPERLY SETUP.
 // IDEAS OF MAKING ADDITIONAL GET REQUEST FOR CERTAIN METRICS HERE
 // CREATING HASHRATE CHART, ETC.
 // SHOULD WE MOVE THE WHOLE "MINER DETAILS" SHEET / DIALOG HERE?

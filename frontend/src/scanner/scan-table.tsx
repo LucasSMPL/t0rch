@@ -118,7 +118,10 @@ export default function ScanTable({ scannedIps }: { scannedIps: ScannedIp[] }) {
           <Button style={{ backgroundColor: "#e94d1b" }} className="mr-4">
             Reboot All
           </Button>
-          <Button style={{ backgroundColor: "#e94d1b" }} className="mr-4">
+          <Button 
+          variant={"outline"}
+          style={{ borderColor: "#D22B2B" }}
+          className="mr-4">
             Config All
           </Button>
           <Sheet>
@@ -233,12 +236,18 @@ export default function ScanTable({ scannedIps }: { scannedIps: ScannedIp[] }) {
           >
             Blink LED
           </Button>
-          <Button style={{ backgroundColor: "#e94d1b" }} className="mr-4">
+          <Button 
+          variant={"outline"}
+          style={{ borderColor: "#D22B2B" }}
+          className="mr-4">
             Sleep Miner
           </Button>
           <Dialog>
             <DialogTrigger>
-              <Button variant="outline" className="mr-4">
+              <Button 
+                variant={"outline"}
+                style={{ borderColor: "#D22B2B" }}
+                className="mr-4">
                 Firmware Upgrade
               </Button>
             </DialogTrigger>
@@ -268,7 +277,10 @@ export default function ScanTable({ scannedIps }: { scannedIps: ScannedIp[] }) {
           </Dialog>
           <Dialog>
             <DialogTrigger>
-              <Button variant="outline" className="mr-4">
+              <Button
+              variant={"outline"}
+              style={{ borderColor: "#D22B2B" }}
+              className="mr-4">
                 Change Pools
               </Button>
             </DialogTrigger>
@@ -296,12 +308,12 @@ export default function ScanTable({ scannedIps }: { scannedIps: ScannedIp[] }) {
                 <Input className="col-span-2" placeholder="Password" />
               </div>
               <DialogFooter className="flex justify-center items-center">
-                <Button className="mx-auto">Update Pool</Button>
+                <Button 
+                className="mx-auto">Update Pool</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
           <Button
-            style={{ backgroundColor: "#e94d1b" }}
             className="mr-4"
             disabled={loading}
             // loading={loading}

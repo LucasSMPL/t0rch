@@ -1,3 +1,5 @@
+import { ModeToggle } from "@/components/mode-toggle";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -46,14 +48,16 @@ export default function ScanStats({
   missingFanCount,
   // notFoundCount,
   psuFailureCount,
+  totalHashrate,
 }: {
-  onScan: () => void;
+  onScan: () => void; // New prop
   scanCount: number;
   underhashingCount: number;
   lessThan3Count: number;
   missingFanCount: number;
   notFoundCount: number;
   psuFailureCount: number;
+  totalHashrate: number;
 }) {
   const nameRef = useRef<HTMLInputElement | null>(null);
   const addressRef = useRef<HTMLInputElement | null>(null);
@@ -72,11 +76,24 @@ export default function ScanStats({
         </h3>
         <div className="flex flex-col p-4 space-x-4 space-y-2">
           <div className="flex flex-row justify-end">
-            {/* coral: FF4433 yellow: FFEA00 */}
-            <Button style={{ backgroundColor: "#49de80", marginRight: "25px" }}>
-              <ZapOff className="mr-2" />
-              LOAD SHED
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger>
+                <Button variant="outline" style={{ borderColor: "#49de80", marginRight: "25px" }}>NUKE <ZapOff className="ml-4" /></Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will send curtailment commands to all Antminers On Scan.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction>Curtail</AlertDialogAction>
+                  <AlertDialogAction style={{backgroundColor: "#5D3FD3"}}>Schedule</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <Sheet>
               <Button
                 style={{ marginRight: "25px" }}
@@ -169,9 +186,10 @@ export default function ScanStats({
                 </Collapsible>
               </SheetContent>
             </Sheet>
-            <Button style={{ backgroundColor: "#e94d1b" }} onClick={onScan}>
+            <Button variant="outline" className="mr-4" style={{ borderColor: "#e94d1b" }} onClick={onScan}>
               Scan Network
             </Button>
+            <ModeToggle />
           </div>
         </div>
       </div>
@@ -242,6 +260,34 @@ export default function ScanStats({
           </CardContent>
         </Card>
       </div>
+      <div className="pt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              Total Hashrate
+            </CardTitle>
+            <Radar />
+          </CardHeader>
+          <CardContent>
+            <div className="text-sm font-bold text-orange-600">
+            {totalHashrate.toFixed(2)} PH
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">
+              total power
+            </CardTitle>
+            <Radar />
+          </CardHeader>
+          <CardContent>
+            <div className="text-sm font-bold text-orange-600">
+              developing
+            </div>
+          </CardContent>
+        </Card>
+        </div>
     </div>
   );
 }
