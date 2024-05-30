@@ -1,12 +1,12 @@
-name: Upload New Version to Supabase Bucket
+name: Test
 
 on:
   push:
     branches:
-      - main
+      - dev
 
 jobs:
-  upload-to-supabase:
+  test:
     runs-on: ubuntu-latest
 
     env:
@@ -26,54 +26,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: "18"
-
       - name: Get current version
         id: current-version
         run: |
-          current_version=$(ls public | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
-          echo "::set-output name=version::$current_version"
-
-      # - name: Get previous version
-      #   id: previous-version
-      #   run: |
-      #     git fetch origin main --depth=1
-      #     previous_version=$(git show origin/main:public | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
-      #     echo "::set-output name=version::$previous_version"
-
-      # - name: Check if new version exists
-      #   id: check-new-version
-      #   run: |
-      #     if [ "${{ steps.current-version.outputs.version }}" != "${{ steps.previous-version.outputs.version }}" ]; then
-      #       echo "New version detected: ${{ steps.current-version.outputs.version }}"
-      #       echo "::set-output name=new_version::true"
-      #     else
-      #       echo "No new version detected"
-      #       echo "::set-output name=new_version::false"
-      #     fi
-
-      # - name: Setup Supabase CLI
-      #   uses: supabase/setup-cli@v1
-      #   with:
-      #     version: 1.169.8
-
-      # - name: Init Supabase Project
-      #   run: supabase init
-
-      # - name: Link Supabase Project
-      #   run: supabase link --project-ref ${{ env.SUPABASE_PROJECT_ID }}
-
-      # - name: Upload to Supabase
-      #   if: steps.check-new-version.outputs.new_version == 'true'
-      #   run: |
-      #     platforms=${{ env.SUPPORTED_PLATFORMS }}
-      #     for p in ${platforms[*]}
-      #     do
-      #       y | supabase storage rm ss:///t0rch/${{ steps.current-version.outputs.version }}/$p.gz --experimental
-      #       supabase storage cp ./public/${{ steps.current-version.outputs.version }}/$p.gz ss:///t0rch/${{ steps.current-version.outputs.version }}/$p.gz --experimental
-      #       y | supabase storage rm ss:///t0rch/$p.json --experimental
-      #       supabase storage cp ./public/$p.json ss:///t0rch/ --experimental
-      #     done
+          current_version=$(cat config.t0rch.json | jq '.version')
+          echo "current_version={current_version}" >> $GITHUB_OUTPUT
+      
+      - name: Get previous version
+        id: previous-version
+        run: |
+          git fetch origin dev --depth=1
+          previous_version=$(cat config.t0rch.json | jq '.version')
+          echo "previous_version={previous_version}" >> $GITHUB_OUTPUT

@@ -19,15 +19,13 @@ import (
 	"github.com/skratchdot/open-golang/open"
 )
 
-var version = "0.0.1"
-
 //go:embed all:frontend/dist
 var reactFS embed.FS
 
 func main() {
 
 	var updater = &selfupdate.Updater{
-		CurrentVersion: version,                                                                    // the current version of your app used to determine if an update is necessary
+		CurrentVersion: GetVersion(),                                                               // the current version of your app used to determine if an update is necessary
 		ApiURL:         "https://conqcdxbczhqszglmwyk.supabase.co/storage/v1/object/public/t0rch/", // endpoint to get update manifest
 		BinURL:         "https://conqcdxbczhqszglmwyk.supabase.co/storage/v1/object/public/t0rch/", // endpoint to get full binaries
 		DiffURL:        "https://conqcdxbczhqszglmwyk.supabase.co/storage/v1/object/public/t0rch/", // endpoint to get binary diff/patches

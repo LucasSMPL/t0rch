@@ -1,5 +1,8 @@
 package main
 
+type TorchConfig struct {
+	Version string `json:"version"`
+}
 type ScannedIp struct {
 	Ip             string  `json:"ip"`
 	IsFound        bool    `json:"is_found"`
