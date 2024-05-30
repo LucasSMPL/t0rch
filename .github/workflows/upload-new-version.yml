@@ -1,0 +1,55 @@
+name: Upload New Version to Supabase Bucket
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  upload-to-supabase:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install Supabase CLI
+        run: npm install -g supabase
+
+      - name: Get current version
+        id: current-version
+        run: |
+          current_version=$(ls public | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
+          echo "::set-output name=version::$current_version"
+
+      - name: Get previous version
+        id: previous-version
+        run: |
+          git fetch origin main --depth=1
+          previous_version=$(git show origin/main:public | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -n 1)
+          echo "::set-output name=version::$previous_version"
+
+      - name: Check if new version exists
+        id: check-new-version
+        run: |
+          if [ "${{ steps.current-version.outputs.version }}" != "${{ steps.previous-version.outputs.version }}" ]; then
+            echo "New version detected: ${{ steps.current-version.outputs.version }}"
+            echo "::set-output name=new_version::true"
+          else
+            echo "No new version detected"
+            echo "::set-output name=new_version::false"
+          fi
+
+      - name: Upload to Supabase
+        if: steps.check-new-version.outputs.new_version == 'true'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          supabase storage cp public/${{ steps.current-version.outputs.version }} t0rch/${{ steps.current-version.outputs.version }}
+          supabase storage cp public/darwin-amd64.json t0rch/darwin-amd64.json

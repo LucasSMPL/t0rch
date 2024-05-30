@@ -15,12 +15,28 @@ import (
 	"time"
 
 	"github.com/icholy/digest"
+	"github.com/sanbornm/go-selfupdate/selfupdate"
+	"github.com/skratchdot/open-golang/open"
 )
+
+var version = "0.0.1"
 
 //go:embed all:frontend/dist
 var reactFS embed.FS
 
 func main() {
+
+	var updater = &selfupdate.Updater{
+		CurrentVersion: version,                                                                    // the current version of your app used to determine if an update is necessary
+		ApiURL:         "https://conqcdxbczhqszglmwyk.supabase.co/storage/v1/object/public/t0rch/", // endpoint to get update manifest
+		BinURL:         "https://conqcdxbczhqszglmwyk.supabase.co/storage/v1/object/public/t0rch/", // endpoint to get full binaries
+		DiffURL:        "https://conqcdxbczhqszglmwyk.supabase.co/storage/v1/object/public/t0rch/", // endpoint to get binary diff/patches
+		// Dir:     "tmp/",                                                                     // directory relative to your app to store temporary state files related to go-selfupdate
+		CmdName: "t0rch",
+	}
+
+	go updater.BackgroundRun()
+
 	distFS, err := fs.Sub(reactFS, "frontend/dist")
 	if err != nil {
 		log.Fatal(err)
@@ -37,7 +53,17 @@ func main() {
 	}
 
 	log.Println("Starting HTTP server at http://localhost:7070 ...")
-	log.Fatal(server.ListenAndServe())
+
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		log.Fatal(server.ListenAndServe())
+	}()
+
+	open.Start("http://localhost:7070")
+	wg.Wait()
+
 }
 
 func scanHandler(w http.ResponseWriter, r *http.Request) {
