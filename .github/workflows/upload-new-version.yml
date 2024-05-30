@@ -19,7 +19,7 @@ jobs:
           node-version: '18'
 
       - name: Install Supabase CLI
-        run: npm install -g supabase
+        run: npm i supabase
 
       - name: Get current version
         id: current-version
