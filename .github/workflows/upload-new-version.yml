@@ -63,5 +63,5 @@ jobs:
       - name: Upload to Supabase
         if: steps.check-new-version.outputs.new_version == 'true'
         run: |
-          npx supabase storage cp public/${{ steps.current-version.outputs.version }} t0rch/${{ steps.current-version.outputs.version }} --experimental
-          npx supabase storage cp public/darwin-amd64.json t0rch/darwin-amd64.json --experimental
+          supabase storage cp public/${{ steps.current-version.outputs.version }} t0rch/${{ steps.current-version.outputs.version }} --experimental
+          supabase storage cp public/darwin-amd64.json t0rch/darwin-amd64.json --experimental
