@@ -52,7 +52,7 @@ jobs:
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: 1.136.3
+          version: 1.169.8
       
       - name: Init Supabase Project
         run: supabase init
