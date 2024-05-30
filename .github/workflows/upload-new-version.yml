@@ -68,6 +68,6 @@ jobs:
         if: steps.check-new-version.outputs.new_version == 'true'
         run: |
           supabase storage cp -r ./public/${{ steps.current-version.outputs.version }} ss:///t0rch/${{ steps.current-version.outputs.version }}/ --experimental
-          supabase storage cp -r ./public/${{ env.P1 }} ss:///t0rch/${{ env.P1 }}/ --experimental
-          supabase storage cp -r ./public/${{ env.P2 }} ss:///t0rch/${{ env.P2 }}/ --experimental
-          supabase storage cp -r ./public/${{ env.P3 }} ss:///t0rch/${{ env.P3 }}/ --experimental
+          supabase storage cp -r ./public/${{ env.P1 }} ss:///t0rch/${{ env.P1 }}.json/ --experimental
+          supabase storage cp -r ./public/${{ env.P2 }} ss:///t0rch/${{ env.P2 }}.json/ --experimental
+          supabase storage cp -r ./public/${{ env.P3 }} ss:///t0rch/${{ env.P3 }}.json/ --experimental
