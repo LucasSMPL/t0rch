@@ -69,11 +69,10 @@ jobs:
       - name: Upload to Supabase
         if: steps.check-new-version.outputs.new_version == 'true'
         run: |
-          echo "storage cp -r ./public/${{ steps.current-version.outputs.version }}/ ss:///t0rch/${{ steps.current-version.outputs.version }}/ --experimental"
-          supabase storage cp -r ./public/${{ steps.current-version.outputs.version }}/ ss:///t0rch/${{ steps.current-version.outputs.version }}/ --experimental
           platforms=${{ env.SUPPORTED_PLATFORMS }}
           for p in ${platforms[*]}
           do
-            yes | supabase storage rm ss:///t0rch/$p.json --experimental
-            supabase storage cp -r ./public/$p.json ss:///t0rch/ --experimental
+            supabase storage cp ./public/${{ steps.current-version.outputs.version }}/$p.gz ss:///t0rch/${{ steps.current-version.outputs.version }}/$p.gz --experimental
+            y | supabase storage rm ss:///t0rch/$p.json --experimental
+            supabase storage cp ./public/$p.json ss:///t0rch/ --experimental
           done
