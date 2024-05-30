@@ -30,7 +30,7 @@ jobs:
         id: current-version
         run: |
           current_version=$(cat config.t0rch.json | jq '.version')
-          echo current_version
+          echo ${current_version}
           echo "current_version={current_version}" >> $GITHUB_OUTPUT
       
       - name: Get previous version
@@ -38,5 +38,5 @@ jobs:
         run: |
           git fetch origin dev --depth=1
           previous_version=$(cat config.t0rch.json | jq '.version')
-          echo previous_version
+          echo ${previous_version}
           echo "previous_version={previous_version}" >> $GITHUB_OUTPUT
