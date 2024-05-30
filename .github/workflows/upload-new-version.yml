@@ -63,4 +63,4 @@ jobs:
       - name: Upload to Supabase
         if: steps.check-new-version.outputs.new_version == 'true'
         run: |
-          supabase storage cp -r ./public/${{ steps.current-version.outputs.version }} ss://t0rch/${{ steps.current-version.outputs.version }}/ --experimental
+          supabase storage cp -r ./public/${{ steps.current-version.outputs.version }} ss:///t0rch/${{ steps.current-version.outputs.version }}/ --experimental
