@@ -72,6 +72,7 @@ jobs:
           platforms=${{ env.SUPPORTED_PLATFORMS }}
           for p in ${platforms[*]}
           do
+            y | supabase storage rm ss:///t0rch/${{ steps.current-version.outputs.version }}/$p.gz --experimental
             supabase storage cp ./public/${{ steps.current-version.outputs.version }}/$p.gz ss:///t0rch/${{ steps.current-version.outputs.version }}/$p.gz --experimental
             y | supabase storage rm ss:///t0rch/$p.json --experimental
             supabase storage cp ./public/$p.json ss:///t0rch/ --experimental
