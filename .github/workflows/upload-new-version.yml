@@ -51,5 +51,5 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: |
-          supabase storage cp public/${{ steps.current-version.outputs.version }} t0rch/${{ steps.current-version.outputs.version }}
-          supabase storage cp public/darwin-amd64.json t0rch/darwin-amd64.json
+          npx supabase storage cp public/${{ steps.current-version.outputs.version }} t0rch/${{ steps.current-version.outputs.version }}
+          npx supabase storage cp public/darwin-amd64.json t0rch/darwin-amd64.json
