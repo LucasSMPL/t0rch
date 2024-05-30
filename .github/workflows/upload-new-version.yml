@@ -15,11 +15,13 @@ jobs:
       SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-      P1: darwin-amd64
-      P2: windows-386
-      P3: linux-arm
+      SUPPORTED_PLATFORMS: |
+        ( 
+          "darwin-amd64" 
+          "windows-386" 
+          "linux-arm" 
+        )
 
-    
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -27,7 +29,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Get current version
         id: current-version
@@ -52,22 +54,23 @@ jobs:
             echo "No new version detected"
             echo "::set-output name=new_version::false"
           fi
-      
+
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
           version: 1.169.8
-      
+
       - name: Init Supabase Project
         run: supabase init
-      
+
       - name: Link Supabase Project
         run: supabase link --project-ref ${{ env.SUPABASE_PROJECT_ID }}
-      
+
       - name: Upload to Supabase
         if: steps.check-new-version.outputs.new_version == 'true'
         run: |
           supabase storage cp -r ./public/${{ steps.current-version.outputs.version }} ss:///t0rch/${{ steps.current-version.outputs.version }}/ --experimental
-          supabase storage cp -r ./public/${{ env.P1 }} ss:///t0rch/${{ env.P1 }}.json/ --experimental
-          supabase storage cp -r ./public/${{ env.P2 }} ss:///t0rch/${{ env.P2 }}.json/ --experimental
-          supabase storage cp -r ./public/${{ env.P3 }} ss:///t0rch/${{ env.P3 }}.json/ --experimental
+          for p in ${{ env.SUPPORTED_PLATFORMS }}
+          do
+            supabase storage cp -r ./public/$p.json ss:///t0rch/ --experimental
+          done
