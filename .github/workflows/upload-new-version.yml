@@ -53,6 +53,6 @@ jobs:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |
           npx supabase login --token ${{ env.SUPABASE_ACCESS_TOKEN }}
-          npx supabase link --project-ref conqcdxbczhqszglmwyk
+          npx supabase link --project-ref conqcdxbczhqszglmwyk --password ${{ env.SUPABASE_DB_PASSWORD }}
           npx supabase storage cp public/${{ steps.current-version.outputs.version }} t0rch/${{ steps.current-version.outputs.version }} --experimental
           npx supabase storage cp public/darwin-amd64.json t0rch/darwin-amd64.json --experimental
