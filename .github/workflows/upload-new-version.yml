@@ -70,7 +70,8 @@ jobs:
         if: steps.check-new-version.outputs.new_version == 'true'
         run: |
           supabase storage cp -r ./public/${{ steps.current-version.outputs.version }} ss:///t0rch/${{ steps.current-version.outputs.version }}/ --experimental
-          for p in ${{ env.SUPPORTED_PLATFORMS }}
+          platforms=${{ env.SUPPORTED_PLATFORMS }}
+          for p in ${platforms[*]}
           do
             supabase storage cp -r ./public/$p.json ss:///t0rch/ --experimental
           done
