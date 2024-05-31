@@ -320,9 +320,6 @@ export default function ScanTable({
           </Dialog>
           <RebootButton
             miners={table.getSelectedRowModel().flatRows.map((e) => e.original)}
-            loading={loading}
-            setLoading={setLoading}
-            setProgress={setProgress}
           />
         </div>
       </CardHeader>

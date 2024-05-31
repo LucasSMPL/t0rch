@@ -1,20 +1,21 @@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { ScannedIp } from "@/lib/types";
-import { Dispatch, SetStateAction } from "react";
+import { useState } from "react";
 
 export const RebootButton = ({
   miners,
-  loading,
-  setLoading,
-  setProgress,
-}: {
+}: // loading,
+// setLoading,
+// setProgress,
+{
   miners: ScannedIp[];
-  loading: boolean;
-  setLoading: Dispatch<SetStateAction<boolean>>;
-  setProgress: Dispatch<SetStateAction<number>>;
+  // loading: boolean;
+  // setLoading: Dispatch<SetStateAction<boolean>>;
+  // setProgress: Dispatch<SetStateAction<number>>;
 }) => {
   const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
   const handleReboot = async (miners: ScannedIp[]) => {
     setLoading(true);
     const response = await fetch("http://localhost:7070/reboot", {
@@ -36,8 +37,8 @@ export const RebootButton = ({
         isDone = true;
         break;
       }
-      const parsed = res.value.split("\n\n").filter((x) => x);
-      setProgress((prev) => prev + (parsed.length / miners.length) * 100);
+      // const parsed = res.value.split("\n\n").filter((x) => x);
+      // setProgress((prev) => prev + (parsed.length / miners.length) * 100);
     }
     setLoading(false);
     toast({

@@ -11,6 +11,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ScannedIp } from "@/lib/types";
+import { RebootButton } from "./reboot-button";
 
 export const MinerDetailsSheet = ({ miner }: { miner: ScannedIp }) => {
   //   const chartData = useQuery(["hashrate_history", miner.ip], async () => {
@@ -85,7 +86,7 @@ export const MinerDetailsSheet = ({ miner }: { miner: ScannedIp }) => {
           <Separator className="my-4" />
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-3">
-              <Button>Reboot</Button>
+              <RebootButton miners={[miner]} />
             </div>
             <div className="flex flex-col gap-3">
               <Button>Create Repair Ticket</Button>
