@@ -42,3 +42,10 @@ jobs:
           echo ${current_version}
           echo "current_version={current_version}" >> $GITHUB_OUTPUT
       
+      - name: Compare Versions
+        uses: jackbilestech/semver-compare@1.0.4
+        with:
+          head: ${{ steps.current-version.outputs.current_version }}
+          base: ${{ steps.previous-version.outputs.previous_version }}
+          operator: ">"
+      
