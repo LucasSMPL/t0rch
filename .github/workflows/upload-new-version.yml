@@ -45,8 +45,8 @@ jobs:
       - name: Compare Versions
         uses: jackbilestech/semver-compare@1.0.4
         with:
-          head: $current_version
-          base: $previous_version
+          head: echo $current_version
+          base: echo $previous_version
           operator: ">"
       
       - name: Set up Node.js
