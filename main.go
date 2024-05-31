@@ -25,10 +25,10 @@ var reactFS embed.FS
 func main() {
 
 	var updater = &selfupdate.Updater{
-		CurrentVersion: GetVersion(),                                                               // the current version of your app used to determine if an update is necessary
-		ApiURL:         "https://conqcdxbczhqszglmwyk.supabase.co/storage/v1/object/public/t0rch/", // endpoint to get update manifest
-		BinURL:         "https://conqcdxbczhqszglmwyk.supabase.co/storage/v1/object/public/t0rch/", // endpoint to get full binaries
-		DiffURL:        "https://conqcdxbczhqszglmwyk.supabase.co/storage/v1/object/public/t0rch/", // endpoint to get binary diff/patches
+		CurrentVersion: GetVersion(),                                          // the current version of your app used to determine if an update is necessary
+		ApiURL:         "https://github.com/LucasSMPL/t0rch/tree/main/public", // endpoint to get update manifest
+		BinURL:         "https://github.com/LucasSMPL/t0rch/tree/main/public", // endpoint to get full binaries
+		DiffURL:        "https://github.com/LucasSMPL/t0rch/tree/main/public", // endpoint to get binary diff/patches
 		// Dir:     "tmp/",                                                                     // directory relative to your app to store temporary state files related to go-selfupdate
 		CmdName: "t0rch",
 	}
