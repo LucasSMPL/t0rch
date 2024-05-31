@@ -46,6 +46,7 @@ func main() {
 
 	router.Handle("GET /", http.FileServer(http.FS(distFS)))
 	router.HandleFunc("POST /scan", scanHandler)
+	router.HandleFunc("GET /hashrate_history/{ip}", hashrateHistoryHandler)
 	router.HandleFunc("POST /blink", blinkHandler)
 	router.HandleFunc("POST /reboot", rebootHandler) // Reboot
 	router.HandleFunc("POST /pool", poolHandler)     // Pools
@@ -68,6 +69,63 @@ func main() {
 
 	open.Start("http://localhost:7070")
 	wg.Wait()
+
+}
+
+func hashrateHistoryHandler(w http.ResponseWriter, r *http.Request) {
+	var param = r.PathValue("ip")
+	var ip = net.ParseIP(param)
+
+	if ip == nil {
+		http.Error(w, "Invalid IP Provided", http.StatusBadRequest)
+		return
+	}
+
+	client := &http.Client{
+		Transport: &digest.Transport{
+			Username: "root",
+			Password: "root",
+		},
+		Timeout: time.Second * 5,
+	}
+
+	apiEndpoint := "/cgi-bin/chart.cgi"
+	fullURL := fmt.Sprintf("http://%s%s", ip, apiEndpoint)
+
+	res, err := client.Get(fullURL)
+	if err != nil {
+		fmt.Println(err)
+		fmt.Fprintln(w, err)
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode >= 300 {
+		fmt.Println(res.Status)
+		fmt.Fprintf(w, "Status is: %s", res.Status)
+	}
+
+	resBytes, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Println(err)
+		fmt.Fprintln(w, err)
+	}
+
+	var ipChart IpChart
+	err = json.Unmarshal(resBytes, &ipChart)
+	if err != nil {
+		fmt.Println(err)
+		fmt.Fprintln(w, err)
+	}
+
+	io.Copy(io.Discard, res.Body)
+
+	jsonData, err := json.Marshal(ipChart)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, "%v", jsonData)
 
 }
 

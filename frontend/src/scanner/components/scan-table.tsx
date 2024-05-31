@@ -29,12 +29,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/components/ui/use-toast";
 import { ScannedIp } from "@/lib/types";
 import { Dispatch, SetStateAction, useState } from "react";
-import { HashrateChart } from "./hashrate-chart";
+import { MinerDetailsSheet } from "./miner-details-sheet";
+import { RebootButton } from "./reboot-button";
 
 interface Pool {
   url: string;
@@ -52,7 +51,6 @@ export default function ScanTable({
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-
 
   const handleBlink = async (miners: ScannedIp[]) => {
     setLoading(true);
@@ -81,37 +79,6 @@ export default function ScanTable({
     setLoading(false);
     toast({
       title: "Blink commands sent successfully",
-      variant: "default",
-    });
-  };
-
-  const handleReboot = async (miners: ScannedIp[]) => {
-    setLoading(true);
-    const response = await fetch("http://localhost:7070/reboot", {
-      method: "POST",
-      headers: {
-        "Content-Type": "text/event-stream",
-      },
-      body: JSON.stringify(miners.map((x) => x.ip)),
-    });
-    const reader = response.body
-      ?.pipeThrough(new TextDecoderStream())
-      .getReader();
-    if (!reader) return;
-    let isDone = false;
-
-    while (!isDone) {
-      const res = await reader.read();
-      if (res.done) {
-        isDone = true;
-        break;
-      }
-      const parsed = res.value.split("\n\n").filter((x) => x);
-      setProgress((prev) => prev + (parsed.length / miners.length) * 100);
-    }
-    setLoading(false);
-    toast({
-      title: "Reboot commands sent successfully",
       variant: "default",
     });
   };
@@ -174,7 +141,6 @@ export default function ScanTable({
     setIsDialogOpen(false); // Close the dialog
   };
 
-
   return (
     <Card className="mx-10">
       <CardHeader className="flex flex-row justify-between">
@@ -193,87 +159,7 @@ export default function ScanTable({
           >
             Config All
           </Button>
-          <Sheet>
-            <Button asChild variant={"outline"} className="mr-4">
-              <SheetTrigger>Miner Details</SheetTrigger>
-            </Button>
-            <SheetContent className="w-[400px] sm:w-[540px] overflow-scroll">
-              <CardContent className="p-6 text-sm">
-                <HashrateChart />
-                <div className="grid gap-3">
-                  <ul className="grid gap-3">
-                    <li className="flex items-center justify-between">
-                      <span className="text-muted-foreground">
-                        Antminer S21 Pro
-                      </span>
-                      <span>219 / 220 TH/S</span>
-                    </li>
-                    <li className="flex items-center justify-between">
-                      <span>Control Board:</span>
-                      <span className="text-muted-foreground">Xilinx</span>
-                    </li>
-                    <li className="flex items-center justify-between">
-                      <span>Hashboards:</span>
-                      <span className="text-muted-foreground">BHB4261</span>
-                    </li>
-                    <li className="flex items-center justify-between">
-                      <span>PSU:</span>
-                      <span className="text-muted-foreground">APW12-15c</span>
-                    </li>
-                  </ul>
-                  <Separator className="my-2" />
-                  <ul className="grid gap-3">
-                    <li className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Pool 1:</span>
-                      <span>Luxor</span>
-                    </li>
-                    <li className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Pool 2:</span>
-                      <span>Nicehash</span>
-                    </li>
-                    <li className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Pool 3:</span>
-                      <span>Braiins</span>
-                    </li>
-                  </ul>
-                  <Separator className="my-2" />
-                  <ul className="grid gap-3">
-                    <li className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Worker 1:</span>
-                      <span>adamhaynes.1</span>
-                    </li>
-                    <li className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Worker 2:</span>
-                      <span>adamhaynes.2</span>
-                    </li>
-                    <li className="flex items-center justify-between">
-                      <span className="text-muted-foreground">Worker 3:</span>
-                      <span>adamhaynes.3</span>
-                    </li>
-                  </ul>
-                </div>
-                <Separator className="my-4" />
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-3">
-                    <Button>Reboot</Button>
-                  </div>
-                  <div className="flex flex-col gap-3">
-                    <Button>Create Repair Ticket</Button>
-                  </div>
-                  <div className="flex flex-col gap-3">
-                    <Button style={{ backgroundColor: "#e94d1b" }}>
-                      Change Pools
-                    </Button>
-                  </div>
-                  <div className="flex flex-col gap-3">
-                    <Button style={{ backgroundColor: "#e94d1b" }}>
-                      IP Settings
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </SheetContent>
-          </Sheet>
+          {/* <MinerDetailsSheet  /> */}
 
           <Button
             className="mr-4"
@@ -330,118 +216,114 @@ export default function ScanTable({
             </DialogContent>
           </Dialog>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger>
+            <DialogTrigger>
+              <Button
+                variant={"outline"}
+                style={{ borderColor: "#D22B2B" }}
+                className="mr-4"
+              >
+                Change Pools
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[850px]">
+              <DialogHeader>
+                <DialogTitle>Changing Pools</DialogTitle>
+                <DialogDescription>
+                  Please enter your stratum url, worker/account, and password
+                  below.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid grid-cols-12 gap-4 py-4">
+                <Input
+                  className="col-span-6"
+                  placeholder="Stratum URL #1"
+                  name="url"
+                  value={pool1.url}
+                  onChange={handleChangePool1}
+                />
+                <Input
+                  className="col-span-4"
+                  placeholder="Worker"
+                  name="user"
+                  value={pool1.user}
+                  onChange={handleChangePool1}
+                />
+                <Input
+                  className="col-span-2"
+                  placeholder="Password"
+                  name="pass"
+                  value={pool1.pass}
+                  onChange={handleChangePool1}
+                />
+              </div>
+              <div className="grid grid-cols-12 gap-4 py-4">
+                <Input
+                  className="col-span-6"
+                  placeholder="Stratum URL #2"
+                  name="url"
+                  value={pool2.url}
+                  onChange={handleChangePool2}
+                />
+                <Input
+                  className="col-span-4"
+                  placeholder="Worker"
+                  name="user"
+                  value={pool2.user}
+                  onChange={handleChangePool2}
+                />
+                <Input
+                  className="col-span-2"
+                  placeholder="Password"
+                  name="pass"
+                  value={pool2.pass}
+                  onChange={handleChangePool2}
+                />
+              </div>
+              <div className="grid grid-cols-12 gap-4 py-4">
+                <Input
+                  className="col-span-6"
+                  placeholder="Stratum URL #3"
+                  name="url"
+                  value={pool3.url}
+                  onChange={handleChangePool3}
+                />
+                <Input
+                  className="col-span-4"
+                  placeholder="Worker"
+                  name="user"
+                  value={pool3.user}
+                  onChange={handleChangePool3}
+                />
+                <Input
+                  className="col-span-2"
+                  placeholder="Password"
+                  name="pass"
+                  value={pool3.pass}
+                  onChange={handleChangePool3}
+                />
+              </div>
+              <DialogFooter className="flex justify-center items-center">
                 <Button
-                  variant={"outline"}
-                  style={{ borderColor: "#D22B2B" }}
-                  className="mr-4"
+                  className="mx-auto"
+                  onClick={() =>
+                    handleUpdatePools(
+                      table
+                        .getSelectedRowModel()
+                        .flatRows.map((e) => e.original)
+                    )
+                  }
                 >
-                  Change Pools
+                  Update Pool
                 </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[850px]">
-                <DialogHeader>
-                  <DialogTitle>Changing Pools</DialogTitle>
-                  <DialogDescription>
-                    Please enter your stratum url, worker/account, and password
-                    below.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid grid-cols-12 gap-4 py-4">
-                  <Input
-                    className="col-span-6"
-                    placeholder="Stratum URL #1"
-                    name="url"
-                    value={pool1.url}
-                    onChange={handleChangePool1}
-                  />
-                  <Input
-                    className="col-span-4"
-                    placeholder="Worker"
-                    name="user"
-                    value={pool1.user}
-                    onChange={handleChangePool1}
-                  />
-                  <Input
-                    className="col-span-2"
-                    placeholder="Password"
-                    name="pass"
-                    value={pool1.pass}
-                    onChange={handleChangePool1}
-                  />
-                </div>
-                <div className="grid grid-cols-12 gap-4 py-4">
-                  <Input
-                    className="col-span-6"
-                    placeholder="Stratum URL #2"
-                    name="url"
-                    value={pool2.url}
-                    onChange={handleChangePool2}
-                  />
-                  <Input
-                    className="col-span-4"
-                    placeholder="Worker"
-                    name="user"
-                    value={pool2.user}
-                    onChange={handleChangePool2}
-                  />
-                  <Input
-                    className="col-span-2"
-                    placeholder="Password"
-                    name="pass"
-                    value={pool2.pass}
-                    onChange={handleChangePool2}
-                  />
-                </div>
-                <div className="grid grid-cols-12 gap-4 py-4">
-                  <Input
-                    className="col-span-6"
-                    placeholder="Stratum URL #3"
-                    name="url"
-                    value={pool3.url}
-                    onChange={handleChangePool3}
-                  />
-                  <Input
-                    className="col-span-4"
-                    placeholder="Worker"
-                    name="user"
-                    value={pool3.user}
-                    onChange={handleChangePool3}
-                  />
-                  <Input
-                    className="col-span-2"
-                    placeholder="Password"
-                    name="pass"
-                    value={pool3.pass}
-                    onChange={handleChangePool3}
-                  />
-                </div>
-                <DialogFooter className="flex justify-center items-center">
-                  <Button
-                    className="mx-auto"
-                    onClick={() =>
-                      handleUpdatePools(
-                        table.getSelectedRowModel().flatRows.map((e) => e.original)
-                      )
-                    }
-                  >
-                    Update Pool
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          <Button
-            className="mr-4"
-            disabled={loading}
-            // loading={loading}
-            onClick={() =>
-              handleReboot(
-                table.getSelectedRowModel().flatRows.map((e) => e.original)
-              )
-            }
-          >
-            REBOOT
-          </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <RebootButton
+            miners={table.getSelectedRowModel().flatRows.map((e) => e.original)}
+            loading={loading}
+            setLoading={setLoading}
+            setProgress={setProgress}
+          />
         </div>
       </CardHeader>
       <CardContent>
@@ -724,6 +606,13 @@ export const ScanTableColumns: ColumnDef<ScannedIp>[] = [
     },
     filterFn: (row, _id, value) => {
       return row.original.is_underhashing == value;
+    },
+  },
+  {
+    accessorKey: "miner_details",
+    header: "",
+    cell: ({ row }) => {
+      return <MinerDetailsSheet miner={row.original} />;
     },
   },
 

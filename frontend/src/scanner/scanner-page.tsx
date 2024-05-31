@@ -39,6 +39,27 @@ export default function ScannerPage() {
   });
   const [scannedIps, setScannedIps] = useState<ScannedIp[]>([]);
   const d = useMemo(() => scannedIps.filter((x) => x.is_found), [scannedIps]);
+  // const d = useMemo<ScannedIp[]>(
+  //   () => [
+  //     {
+  //       controller: "unknown",
+  //       fan_count: 0,
+  //       hashboard_type: "unknown",
+  //       hashrate: 0,
+  //       hb_count: 0,
+  //       ip: "89.0.142.86",
+  //       is_found: false,
+  //       is_underhashing: false,
+  //       miner_type: "unknown",
+  //       model_found: false,
+  //       power_type: "unknown",
+  //       psu_failure: false,
+  //       uptime: 0,
+  //       worker: "unknown",
+  //     },
+  //   ],
+  //   []
+  // );
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState({});
 
@@ -234,7 +255,7 @@ const Header = ({
   return (
     <>
       <LoadingBar
-        color="#e94d1b"
+        color="#ffffff"
         progress={progress}
         height={5}
         onLoaderFinished={() => setProgress(0)}
