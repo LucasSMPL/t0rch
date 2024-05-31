@@ -10,6 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      previous_version: 0.0.0
+      current_version: 0.0.0
       SUPABASE_PROJECT_ID: conqcdxbczhqszglmwyk
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
@@ -45,8 +47,8 @@ jobs:
       - name: Compare Versions
         uses: jackbilestech/semver-compare@1.0.4
         with:
-          head: echo $current_version
-          base: echo $previous_version
+          head: ${{ env.current_version }}
+          base: ${{ env.previous_version }}
           operator: ">"
       
       - name: Set up Node.js
