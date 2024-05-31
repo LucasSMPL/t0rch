@@ -47,6 +47,8 @@ func main() {
 	router.Handle("GET /", http.FileServer(http.FS(distFS)))
 	router.HandleFunc("POST /scan", scanHandler)
 	router.HandleFunc("POST /blink", blinkHandler)
+	router.HandleFunc("POST /reboot", rebootHandler) // Reboot
+	router.HandleFunc("POST /pool", poolHandler)     // Pools
 	router.HandleFunc("POST /tcp", tcpHandler)
 
 	server := http.Server{
@@ -580,6 +582,215 @@ func blinkHandler(w http.ResponseWriter, r *http.Request) {
 		flusher.Flush()
 	}
 
+}
+
+func rebootHandler(w http.ResponseWriter, r *http.Request) {
+	var body []string
+	decoder := json.NewDecoder(r.Body)
+
+	if err := decoder.Decode(&body); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if len(body) == 0 {
+		http.Error(w, "No IP Bases Provided", http.StatusBadRequest)
+		return
+	}
+
+	ips := []net.IP{}
+
+	for _, ip := range body {
+		parsedIp := net.ParseIP(ip)
+		if parsedIp == nil {
+			http.Error(w, "Invalid IP Provided", http.StatusBadRequest)
+			return
+		}
+		ips = append(ips, parsedIp)
+	}
+
+	client := &http.Client{
+		Transport: &digest.Transport{
+			Username: "root",
+			Password: "root",
+		},
+		Timeout: time.Second * 5,
+	}
+
+	resCh := make(chan string)
+
+	go func() {
+		wg := sync.WaitGroup{}
+		concurrencyLimit := 200
+		semaphore := make(chan struct{}, concurrencyLimit)
+
+		for _, ip := range ips {
+			wg.Add(1)
+			semaphore <- struct{}{}
+			go func(ip net.IP) {
+				defer wg.Done()
+				defer func() { <-semaphore }()
+				apiEndpoint := "/cgi-bin/reboot.cgi"
+				fullURL := fmt.Sprintf("http://%s%s", ip, apiEndpoint)
+
+				res, err := client.Post(fullURL, "application/json", nil)
+				if err != nil {
+					fmt.Println(err)
+					resCh <- "error"
+					return
+				}
+				defer res.Body.Close()
+
+				if res.StatusCode >= 300 {
+					fmt.Printf("status: %d\n", res.StatusCode)
+					resCh <- "error"
+					return
+				}
+
+				resCh <- "success"
+			}(ip)
+		}
+
+		wg.Wait()
+		close(semaphore)
+		close(resCh)
+	}()
+
+	// Set headers for SSE
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+
+	// Flush the headers to the client
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "Streaming unsupported", http.StatusInternalServerError)
+		return
+	}
+
+	// stream of reboot results
+	for r := range resCh {
+		fmt.Fprintf(w, "%s\n\n", r)
+		fmt.Printf("%s", r)
+		flusher.Flush()
+	}
+}
+
+type Pool struct {
+	URL  string `json:"url"`
+	User string `json:"user"`
+	Pass string `json:"pass"`
+}
+
+type PoolConfig struct {
+	Pools []Pool `json:"pools"`
+}
+
+func poolHandler(w http.ResponseWriter, r *http.Request) {
+	var request struct {
+		IPs   []string `json:"ips"`
+		Pools []Pool   `json:"pools"`
+	}
+	decoder := json.NewDecoder(r.Body)
+
+	if err := decoder.Decode(&request); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if len(request.IPs) == 0 {
+		http.Error(w, "No IPs Provided", http.StatusBadRequest)
+		return
+	}
+
+	if len(request.Pools) == 0 {
+		http.Error(w, "No Pools Provided", http.StatusBadRequest)
+		return
+	}
+
+	ips := []net.IP{}
+
+	for _, ip := range request.IPs {
+		parsedIp := net.ParseIP(ip)
+		if parsedIp == nil {
+			http.Error(w, "Invalid IP Provided", http.StatusBadRequest)
+			return
+		}
+		ips = append(ips, parsedIp)
+	}
+
+	client := &http.Client{
+		Transport: &digest.Transport{
+			Username: "root",
+			Password: "root",
+		},
+		Timeout: time.Second * 5,
+	}
+
+	resCh := make(chan string)
+
+	go func() {
+		wg := sync.WaitGroup{}
+		concurrencyLimit := 200
+		semaphore := make(chan struct{}, concurrencyLimit)
+
+		for _, ip := range ips {
+			wg.Add(1)
+			semaphore <- struct{}{}
+			go func(ip net.IP) {
+				defer wg.Done()
+				defer func() { <-semaphore }()
+				apiEndpoint := "/cgi-bin/set_miner_conf.cgi"
+				fullURL := fmt.Sprintf("http://%s%s", ip, apiEndpoint)
+
+				config := PoolConfig{Pools: request.Pools}
+				marshalled, err := json.Marshal(config)
+				if err != nil {
+					log.Fatalf("impossible to marshall config: %s", err)
+					resCh <- "error"
+					return
+				}
+				res, err := client.Post(fullURL, "application/json", bytes.NewReader(marshalled))
+				if err != nil {
+					fmt.Println(err)
+					resCh <- "error"
+					return
+				}
+				defer res.Body.Close()
+
+				if res.StatusCode >= 300 {
+					fmt.Printf("status: %d\n", res.StatusCode)
+					resCh <- "error"
+					return
+				}
+
+				resCh <- "success"
+			}(ip)
+		}
+
+		wg.Wait()
+		close(semaphore)
+		close(resCh)
+	}()
+
+	// Set headers for SSE
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+
+	// Flush the headers to the client
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "Streaming unsupported", http.StatusInternalServerError)
+		return
+	}
+
+	// stream of results
+	for r := range resCh {
+		fmt.Fprintf(w, "%s\n\n", r)
+		fmt.Printf("%s", r)
+		flusher.Flush()
+	}
 }
 
 func tcpHandler(w http.ResponseWriter, r *http.Request) {
