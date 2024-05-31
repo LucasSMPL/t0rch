@@ -33,20 +33,20 @@ jobs:
         run: |
           previous_version=$(git show HEAD~1:config.t0rch.json | jq -r '.version')
           echo ${previous_version}
-          echo "previous_version=$previous_version" >> $GITHUB_OUTPUT
+          echo "previous_version=$previous_version" >> $GITHUB_ENV
 
       - name: Get current version
         id: current-version
         run: |
           current_version=$(cat config.t0rch.json | jq '.version')
           echo ${current_version}
-          echo "current_version={current_version}" >> $GITHUB_OUTPUT
+          echo "current_version={current_version}" >> $GITHUB_ENV
       
       - name: Compare Versions
         uses: jackbilestech/semver-compare@1.0.4
         with:
-          head: ${{ steps.current-version.outputs.current_version }}
-          base: ${{ steps.previous-version.outputs.previous_version }}
+          head: $current_version
+          base: $previous_version
           operator: ">"
       
       - name: Set up Node.js
