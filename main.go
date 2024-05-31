@@ -47,6 +47,7 @@ func main() {
 	router.Handle("GET /", http.FileServer(http.FS(distFS)))
 	router.HandleFunc("POST /scan", scanHandler)
 	router.HandleFunc("POST /blink", blinkHandler)
+	router.HandleFunc("POST /tcp", tcpHandler)
 
 	server := http.Server{
 		Addr:    ":7070",
@@ -579,4 +580,59 @@ func blinkHandler(w http.ResponseWriter, r *http.Request) {
 		flusher.Flush()
 	}
 
+}
+
+func tcpHandler(w http.ResponseWriter, r *http.Request) {
+	var body struct {
+		Host string `json:"host"`
+		Port string `json:"port"`
+	}
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&body); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	payload, err := json.Marshal(struct {
+		Cmd string `json:"cmd"`
+	}{
+		Cmd: "summary"})
+	if err != nil {
+		log.Fatalf("impossible to marshall blink: %s", err)
+		return
+	}
+
+	tcpAddr, err := net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%s", body.Host, body.Port))
+
+	if err != nil {
+		println("ResolveTCPAddr failed:", err.Error())
+		return
+	}
+
+	conn, err := net.DialTCP("tcp", nil, tcpAddr)
+	if err != nil {
+		println("Dial failed:", err.Error())
+		return
+	}
+
+	_, err = conn.Write([]byte(payload))
+	if err != nil {
+		println("Write to server failed:", err.Error())
+		return
+	}
+
+	println("write to server = ", payload)
+
+	reply := make([]byte, 1024)
+
+	_, err = conn.Read(reply)
+	if err != nil {
+		println("Write to server failed:", err.Error())
+		return
+	}
+
+	println("reply from server=", string(reply))
+
+	conn.Close()
+	fmt.Fprintf(w, "%s", string(reply))
 }
