@@ -29,10 +29,11 @@ jobs:
         run: |
           next_version=$(cat config.t0rch.json | jq '.version')
           echo ${next_version}
+          mkdir ./tmp
           platforms=${{ env.SUPPORTED_PLATFORMS }}
           for p in ${platforms[*]}
           do
-            mkdir ./tmp/$p
+            touch ./tmp/$p
           done
           ~/go/bin/go-selfupdate ./tmp ${next_version}
       
