@@ -34,12 +34,49 @@ import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/components/ui/use-toast";
 import { ScannedIp } from "@/lib/types";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { HashrateChart } from "./hashrate-chart";
 
-export default function ScanTable({ table }: { table: tTable<ScannedIp> }) {
+export default function ScanTable({
+  table,
+  setProgress,
+}: {
+  table: tTable<ScannedIp>;
+  setProgress: Dispatch<SetStateAction<number>>;
+}) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+
+  const handleBlink = async (miners: ScannedIp[]) => {
+    setLoading(true);
+    const response = await fetch("http://localhost:7070/blink", {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/event-stream",
+      },
+      body: JSON.stringify(miners.map((x) => x.ip)),
+    });
+    const reader = response.body
+      ?.pipeThrough(new TextDecoderStream())
+      .getReader();
+    if (!reader) return;
+    let isDone = false;
+
+    while (!isDone) {
+      const res = await reader.read();
+      if (res.done) {
+        isDone = true;
+        break;
+      }
+      const parsed = res.value.split("\n\n").filter((x) => x);
+      setProgress((prev) => prev + (parsed.length / miners.length) * 100);
+    }
+    setLoading(false);
+    toast({
+      title: "Blink commands sent successfully",
+      variant: "default",
+    });
+  };
 
   return (
     <Card className="mx-10">
@@ -146,28 +183,11 @@ export default function ScanTable({ table }: { table: tTable<ScannedIp> }) {
             variant="outline"
             disabled={loading}
             // loading={loading}
-            onClick={async () => {
-              try {
-                setLoading(true);
-                await axios.post("http://localhost:7070/blink", {
-                  ips: table
-                    .getSelectedRowModel()
-                    .flatRows.map((e) => e.original.ip),
-                });
-                setLoading(false);
-                toast({
-                  title: "Blink sequence successfull",
-                  variant: "default",
-                });
-              } catch (error) {
-                setLoading(false);
-                console.log(error);
-                toast({
-                  title: "Something went wrong!",
-                  variant: "destructive",
-                });
-              }
-            }}
+            onClick={() =>
+              handleBlink(
+                table.getSelectedRowModel().flatRows.map((e) => e.original)
+              )
+            }
           >
             Blink LED
           </Button>
