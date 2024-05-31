@@ -21,6 +21,9 @@ jobs:
         )
 
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      
       - name: Setup Node environment
         uses: actions/setup-node@v4
         with:
@@ -28,7 +31,7 @@ jobs:
         
       - name: Build Frontend
         run: |
-          cd ./frontend
+          cd frontend
           npm install
           npm run build
           cd ../
@@ -38,8 +41,8 @@ jobs:
       
       - name: Install go-selfupdate
         run: go install github.com/sanbornm/go-selfupdate/cmd/go-selfupdate@latest
-
-      - uses: actions/checkout@v3
+      
+      
       - name: Generate Binaries
         run: |
           next_version=$(cat config.t0rch.json | jq -r '.version')
