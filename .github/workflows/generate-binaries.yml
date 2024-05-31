@@ -9,6 +9,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+
     env:
       SUPPORTED_PLATFORMS: |
         ( 
