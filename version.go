@@ -1,22 +1,16 @@
 package main
 
 import (
+	"embed"
 	"encoding/json"
-	"io"
 	"log"
-	"os"
 )
 
+//go:embed config.t0rch.json
+var embedFS embed.FS
+
 func GetVersion() string {
-	configFilePath := "config.t0rch.json"
-
-	configFile, err := os.Open(configFilePath)
-	if err != nil {
-		log.Fatalf("Failed to open config file: %v", err)
-	}
-	defer configFile.Close()
-
-	configData, err := io.ReadAll(configFile)
+	configData, err := embedFS.ReadFile("config.t0rch.json")
 	if err != nil {
 		log.Fatalf("Failed to read config file: %v", err)
 	}

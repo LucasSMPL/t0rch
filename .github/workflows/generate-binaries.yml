@@ -1,0 +1,66 @@
+name: Generate Binaries
+
+on:
+  push:
+    branches: ['main']
+    paths: ['config.t0rch.json']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    env:
+      SUPPORTED_PLATFORMS: |
+        ( 
+          "darwin-amd64" 
+          "windows-386" 
+          "linux-arm" 
+        )
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      
+      - name: Setup Node environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+        
+      - name: Build Frontend
+        run: |
+          cd frontend
+          npm install
+          npm run build
+          cd ../
+      
+      - name: Setup Go environment
+        uses: actions/setup-go@v5.0.1
+      
+      - name: Install go-selfupdate
+        run: go install github.com/sanbornm/go-selfupdate/cmd/go-selfupdate@latest
+      
+      
+      - name: Generate Binaries
+        run: |
+          next_version=$(cat config.t0rch.json | jq -r '.version')
+          echo ${next_version}
+          platforms=${{ env.SUPPORTED_PLATFORMS }}
+          for p in ${platforms[*]}
+          do
+            split=(${p//-/ })
+            goos=${split[0]}
+            goarch=${split[1]}
+            GOOS=$goos GOARCH=$goarch go build -o tmp/$p
+          done
+          ~/go/bin/go-selfupdate ./tmp ${next_version}
+      
+      - name: Commit Generated Binaries
+        run: |
+          git config --global user.name 'muezz'
+          git config --global user.email 'muezz7055@gmail.com'
+          git add .
+          git commit -am "t0rch version bump"
+          git push

@@ -24,7 +24,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { LucideIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useMemo, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import { ScannedIp } from "../lib/types";
 import { NukeDialog } from "./components/nuke-dialog";
@@ -32,6 +32,7 @@ import ScanTable, { ScanTableColumns } from "./components/scan-table";
 import { SelectIpBaseSheet } from "./components/select-ip-base-sheet";
 
 export default function ScannerPage() {
+  const [progress, setProgress] = useState(0);
   const [banner] = useState({
     message: "There is a curtailment scheduled: Tuesday - 8:00pm to 9:15pm!",
     visible: true,
@@ -81,7 +82,11 @@ export default function ScannerPage() {
         </div>
       )}
       <div className="mb-5">
-        <Header setScannedIps={setScannedIps} />
+        <Header
+          setScannedIps={setScannedIps}
+          progress={progress}
+          setProgress={setProgress}
+        />
 
         <div className="grid gap-4 md:grid-cols-5 lg:grid-cols-5 pt-4 mx-10">
           {[
@@ -154,7 +159,7 @@ export default function ScannerPage() {
           ))}
         </div>
       </div>
-      <ScanTable table={table} />
+      <ScanTable table={table} setProgress={setProgress} />
     </div>
   );
 }
@@ -185,12 +190,14 @@ const InfoCard = ({
 
 const Header = ({
   setScannedIps,
+  progress,
+  setProgress,
 }: {
   setScannedIps: React.Dispatch<React.SetStateAction<ScannedIp[]>>;
+  progress: number;
+  setProgress: Dispatch<SetStateAction<number>>;
 }) => {
   const selectedBases = useLocalStorage<string[]>("selected-ip-bases", []);
-
-  const [progress, setProgress] = useState(0);
 
   const startScan = async () => {
     setScannedIps([]);

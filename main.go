@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"embed"
 	"encoding/json"
 	"fmt"
@@ -15,7 +16,6 @@ import (
 	"time"
 
 	"github.com/icholy/digest"
-	"github.com/sanbornm/go-selfupdate/selfupdate"
 	"github.com/skratchdot/open-golang/open"
 )
 
@@ -24,16 +24,18 @@ var reactFS embed.FS
 
 func main() {
 
-	var updater = &selfupdate.Updater{
-		CurrentVersion: GetVersion(),                                                               // the current version of your app used to determine if an update is necessary
-		ApiURL:         "https://conqcdxbczhqszglmwyk.supabase.co/storage/v1/object/public/t0rch/", // endpoint to get update manifest
-		BinURL:         "https://conqcdxbczhqszglmwyk.supabase.co/storage/v1/object/public/t0rch/", // endpoint to get full binaries
-		DiffURL:        "https://conqcdxbczhqszglmwyk.supabase.co/storage/v1/object/public/t0rch/", // endpoint to get binary diff/patches
-		// Dir:     "tmp/",                                                                     // directory relative to your app to store temporary state files related to go-selfupdate
-		CmdName: "t0rch",
-	}
+	// var version = GetVersion()
 
-	go updater.BackgroundRun()
+	// var updater = &selfupdate.Updater{
+	// 	CurrentVersion: version,                                               // the current version of your app used to determine if an update is necessary
+	// 	ApiURL:         "https://github.com/LucasSMPL/t0rch/tree/main/public", // endpoint to get update manifest
+	// 	BinURL:         "https://github.com/LucasSMPL/t0rch/tree/main/public", // endpoint to get full binaries
+	// 	DiffURL:        "https://github.com/LucasSMPL/t0rch/tree/main/public", // endpoint to get binary diff/patches
+	// 	// Dir:     "tmp/",                                                                     // directory relative to your app to store temporary state files related to go-selfupdate
+	// 	CmdName: "t0rch",
+	// }
+
+	// go updater.BackgroundRun()
 
 	distFS, err := fs.Sub(reactFS, "frontend/dist")
 	if err != nil {
@@ -44,13 +46,15 @@ func main() {
 
 	router.Handle("GET /", http.FileServer(http.FS(distFS)))
 	router.HandleFunc("POST /scan", scanHandler)
+	router.HandleFunc("POST /blink", blinkHandler)
 
 	server := http.Server{
 		Addr:    ":7070",
 		Handler: router,
 	}
 
-	log.Println("Starting HTTP server at http://localhost:7070 ...")
+	// log.Printf("Version: %s\n", version)
+	log.Println("Starting HTTP server at http://localhost:7070")
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
@@ -469,4 +473,110 @@ func getMinerModels() *[]MinerModel {
 	io.Copy(io.Discard, res.Body)
 
 	return &models
+}
+
+func blinkHandler(w http.ResponseWriter, r *http.Request) {
+	var body []string
+	decoder := json.NewDecoder(r.Body)
+
+	if err := decoder.Decode(&body); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if len(body) == 0 {
+		http.Error(w, "No IP Bases Provided", http.StatusBadRequest)
+		return
+	}
+
+	ips := []net.IP{}
+
+	for _, ip := range body {
+		parsedIp := net.ParseIP(ip)
+		if parsedIp == nil {
+			http.Error(w, "Invalid IP Provided", http.StatusBadRequest)
+			return
+		}
+		ips = append(ips, parsedIp)
+	}
+
+	client := &http.Client{
+		Transport: &digest.Transport{
+			Username: "root",
+			Password: "root",
+		},
+		Timeout: time.Second * 5,
+	}
+
+	resCh := make(chan string)
+
+	go func() {
+		wg := sync.WaitGroup{}
+		concurrencyLimit := 200
+		semaphore := make(chan struct{}, concurrencyLimit)
+
+		for _, ip := range ips {
+			wg.Add(1)
+			semaphore <- struct{}{}
+			go func(ip net.IP) {
+				defer wg.Done()
+				defer func() { <-semaphore }()
+				apiEndpoint := "/cgi-bin/blink.cgi"
+				fullURL := fmt.Sprintf("http://%s%s", ip, apiEndpoint)
+
+				type BlinkApiBody = struct {
+					Blink bool `json:"blink"`
+				}
+
+				blink := BlinkApiBody{
+					Blink: true,
+				}
+				marshalled, err := json.Marshal(blink)
+				if err != nil {
+					log.Fatalf("impossible to marshall blink: %s", err)
+					resCh <- "error"
+					return
+				}
+				res, err := client.Post(fullURL, "application/json", bytes.NewReader(marshalled))
+				if err != nil {
+					fmt.Println(err)
+					resCh <- "error"
+					return
+				}
+				defer res.Body.Close()
+
+				if res.StatusCode >= 300 {
+					fmt.Printf("status: %d\n", res.StatusCode)
+					resCh <- "error"
+					return
+				}
+
+				resCh <- "success"
+			}(ip)
+		}
+
+		wg.Wait()
+		close(semaphore)
+		close(resCh)
+	}()
+
+	// Set headers for SSE
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+
+	// Flush the headers to the client
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "Streaming unsupported", http.StatusInternalServerError)
+		return
+	}
+
+	// stream of scanned IPs
+	for r := range resCh {
+		fmt.Fprintf(w, "%s\n\n", r)
+		fmt.Printf("%s", r)
+		flusher.Flush()
+	}
+
 }
