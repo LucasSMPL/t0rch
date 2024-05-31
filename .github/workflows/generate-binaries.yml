@@ -30,13 +30,15 @@ jobs:
       - uses: actions/checkout@v3
       - name: Generate Binaries
         run: |
-          next_version=$(cat config.t0rch.json | jq '.version')
+          next_version=$(cat config.t0rch.json | jq -r '.version')
           echo ${next_version}
-          mkdir ./tmp
           platforms=${{ env.SUPPORTED_PLATFORMS }}
           for p in ${platforms[*]}
           do
-            touch ./tmp/$p
+            split=(${p//-/ })
+            goos=${split[0]}
+            goarch=${split[1]}
+            GOOS=$goos GOARCH=$goarch go build -o tmp/$p
           done
           ~/go/bin/go-selfupdate ./tmp ${next_version}
       
@@ -45,5 +47,5 @@ jobs:
           git config --global user.name 'muezz'
           git config --global user.email 'muezz7055@gmail.com'
           git add .
-          git commit -am "t0rch version bump: ${next_version}"
+          git commit -am "t0rch version bump"
           git push
