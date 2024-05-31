@@ -23,19 +23,15 @@ jobs:
         )
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
-
-      - name: Read version before latest commit
-        id: version_before
-        run: |
-          version_before=$(git show HEAD~1:config.t0rch.json | jq -r '.version')
-          echo "version_before=$version_before" >> $GITHUB_OUTPUT
-
-      - name: Checkout current push
+      - name: Checkout Repository
         uses: actions/checkout@v3
+        
+      - name: Previous Version
+        id: previous-version
+        run: |
+          previous_version=$(git show HEAD~1:config.t0rch.json | jq -r '.version')
+          echo ${previous_version}
+          echo "previous_version=$previous_version" >> $GITHUB_OUTPUT
 
       - name: Get current version
         id: current-version
