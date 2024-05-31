@@ -24,8 +24,10 @@ var reactFS embed.FS
 
 func main() {
 
+	var version = GetVersion()
+
 	var updater = &selfupdate.Updater{
-		CurrentVersion: GetVersion(),                                          // the current version of your app used to determine if an update is necessary
+		CurrentVersion: version,                                               // the current version of your app used to determine if an update is necessary
 		ApiURL:         "https://github.com/LucasSMPL/t0rch/tree/main/public", // endpoint to get update manifest
 		BinURL:         "https://github.com/LucasSMPL/t0rch/tree/main/public", // endpoint to get full binaries
 		DiffURL:        "https://github.com/LucasSMPL/t0rch/tree/main/public", // endpoint to get binary diff/patches
@@ -50,7 +52,8 @@ func main() {
 		Handler: router,
 	}
 
-	log.Println("Starting HTTP server at http://localhost:7070 ...")
+	log.Printf("Version: %s\n", version)
+	log.Println("Starting HTTP server at http://localhost:7070")
 
 	wg := sync.WaitGroup{}
 	wg.Add(1)
