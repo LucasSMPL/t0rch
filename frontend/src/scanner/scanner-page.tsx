@@ -264,7 +264,7 @@ const Header = ({
       <div className="flex items-center justify-between p-4">
         <h3 className="text-2xl font-bold text-orange-600 flex items-center">
           <FlameKindling style={{ color: "#ffffff" }} />
-          <span className="pl-4 pr-4">t0rch | asic scanner</span>
+          <span className="pl-4 pr-4">t0rch | asic scanner updated</span>
           <FireExtinguisher style={{ color: "#ffffff" }} />
         </h3>
         <div className="flex flex-col p-4 space-x-4 space-y-2">
