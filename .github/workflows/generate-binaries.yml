@@ -42,6 +42,8 @@ jobs:
 
       - name: Setup Go environment
         uses: actions/setup-go@v5.0.1
+        with:
+          go-version: 1.22.3
 
       - name: Install go-selfupdate
         run: go install github.com/sanbornm/go-selfupdate/cmd/go-selfupdate@latest
@@ -64,14 +66,14 @@ jobs:
           do
             curl \
               -X POST "https://${{env.SUPABASE_PROJECT_ID}}.supabase.co/storage/v1/object/t0rch/${next_version}/$p.gz" \
-              --data-binary "@/public/${next_version}/$p.gz" \
+              --data-binary "@./public/${next_version}/$p.gz" \
               -H "apikey: ${{env.SUPABASE_KEY}}" \
               -H "Authorization: Bearer ${{env.SUPABASE_KEY}}"
               -H 'Content-Type: application/octet-stream' \
               -H "x-upsert: true"
             curl \
               -X POST "https://${{env.SUPABASE_PROJECT_ID}}.supabase.co/storage/v1/object/t0rch/$p.json" \
-              --data-binary "@/public/$p.json" \
+              --data-binary "@./public/$p.json" \
               -H "apikey: ${{env.SUPABASE_KEY}}" \
               -H "Authorization: Bearer ${{env.SUPABASE_KEY}}"
               -H "x-upsert: true"
