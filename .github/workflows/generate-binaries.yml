@@ -65,19 +65,19 @@ jobs:
           for p in ${platforms[*]}
           do
             curl  -X POST \
-              'https://${{env.SUPABASE_PROJECT_ID}}.supabase.co/storage/v1/object/t0rch/${next_version}/$p.gz' \
-              --header 'Accept: */*' \
-              --header 'apikey: ${{env.SUPABASE_SECRET}}' \
-              --header 'Authorization: Bearer ${{env.SUPABASE_SECRET}}' \
-              --header 'x-upsert: true' \
-              --header 'Content-Type: application/octet-stream' \
-              --data-binary '@./public/${next_version}/$p.gz'
+              "https://${{env.SUPABASE_PROJECT_ID}}.supabase.co/storage/v1/object/t0rch/${next_version}/$p.gz" \
+              --header "Accept: */*" \
+              --header "apikey: ${{env.SUPABASE_SECRET}}" \
+              --header "Authorization: Bearer ${{env.SUPABASE_SECRET}}" \
+              --header "x-upsert: true" \
+              --header "Content-Type: application/octet-stream" \
+              --data-binary "@./public/${next_version}/$p.gz"
             curl  -X POST \
-              'https://${{env.SUPABASE_PROJECT_ID}}.supabase.co/storage/v1/object/t0rch/$p.json' \
-              --header 'Accept: */*' \
-              --header 'apikey: ${{env.SUPABASE_SECRET}}' \
-              --header 'Authorization: Bearer ${{env.SUPABASE_SECRET}}' \
-              --header 'x-upsert: true' \
-              --header 'Content-Type: application/octet-stream' \
-              --data-binary '@./public/$p.json'
+              "https://${{env.SUPABASE_PROJECT_ID}}.supabase.co/storage/v1/object/t0rch/$p.json" \
+              --header "Accept: */*" \
+              --header "apikey: ${{env.SUPABASE_SECRET}}" \
+              --header "Authorization: Bearer ${{env.SUPABASE_SECRET}}" \
+              --header "x-upsert: true" \
+              --header "Content-Type: application/octet-stream" \
+              --data-binary "@./public/$p.json"
           done
