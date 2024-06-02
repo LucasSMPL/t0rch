@@ -1,15 +1,6 @@
-GO = go
-GOFLAGS = -ldflags="-s -w"
-SUPPORTED_PLATFORMS = ( "darwin-amd64" "windows-386" "linux-arm" )
-TARGET = t0rch
-
-build:
+all:
 	cd frontend; npm install; npm run build; cd ../
-	next_version=$(cat config.t0rch.json | jq -r '.version')
-	echo ${next_version}
-	platforms=${{ SUPPORTED_PLATFORMS }}
-	GOOS=darwin GOARCH=amd64 go build -o tmp/darwin-amd64
-	~/go/bin/go-selfupdate ./tmp ${next_version}
+	go build -o ./tmp
 
 # $(TARGET): main.go
 # $(GO) build $(GOFLAGS) -o $(TARGET) main.go
