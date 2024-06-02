@@ -51,12 +51,15 @@ func main() {
 	router := http.NewServeMux()
 
 	router.Handle("GET /", http.FileServer(http.FS(distFS)))
-	router.HandleFunc("POST /scan", scanHandler)
-	router.HandleFunc("GET /hashrate_history/{ip}", hashrateHistoryHandler)
-	router.HandleFunc("POST /blink", blinkHandler)
-	router.HandleFunc("POST /reboot", rebootHandler) // Reboot
-	router.HandleFunc("POST /pool", poolHandler)     // Pools
-	router.HandleFunc("POST /tcp", tcpHandler)
+	router.HandleFunc("POST /scan", scanHandler)                            // Find Antminers
+	router.HandleFunc("GET /hashrate_history/{ip}", hashrateHistoryHandler) // Hashrate Chart Antminer
+	router.HandleFunc("POST /blink", blinkHandler)                          // Blink ON Antminer
+	router.HandleFunc("POST /reboot", rebootHandler)                        // Reboot Antminer
+	router.HandleFunc("POST /pool", poolHandler)                            // Change Pool Antminer
+	router.HandleFunc("POST /factory_reset", factoryResetHandler)           // Factory Reset Antminer
+	router.HandleFunc("GET /log", showLogHandler)                           // Show Log Antminer
+	router.HandleFunc("GET /ip_settings", ipSettingsHandler)                // Get Network Info Antminer
+	router.HandleFunc("POST /tcp", tcpHandler)                              // Find Whatsminer
 
 	server := http.Server{
 		Addr:    ":7070",
@@ -281,21 +284,26 @@ func getMinerData(
 	if len(ipConf.Pools) > 0 {
 		worker = ipConf.Pools[0].User
 	}
+	url := ""
+	if len(ipConf.Pools) > 0 {
+		url = ipConf.Pools[0].Url
+	}
+
 	elapsed := 0
 	rate5s := 0.0
+	rateIdeal := 0.0
+	CompileTime := ""
 	isUnderhashing := false
 	if len(ipSummary.Summary) > 0 {
 		elapsed = ipSummary.Summary[0].Elapsed
 		rate5s = ipSummary.Summary[0].Rate_5s
+		rateIdeal = ipSummary.Summary[0].RateIdeal
+		CompileTime = ipSummary.Info.CompileTime
 		isUnderhashing = (rate5s / 1000) < (float64(hashrate) * 0.8)
 	}
 
 	fanNum := 0
 	chainNum := 0
-	if len(ipStats.Stats) > 0 {
-		fanNum = ipStats.Stats[0].FanNum
-		chainNum = ipStats.Stats[0].ChainNum
-	}
 
 	controller := "N/A"
 	powerType := "Unknown"
@@ -343,6 +351,9 @@ func getMinerData(
 		HashboardType:  hbType,
 		PsuFailure:     psuFailure,
 		ModelFound:     hashrate != 0.0,
+		RateIdeal:      rateIdeal,
+		CompileTime:    CompileTime,
+		Url:            url,
 	}
 
 	return scannedIp
@@ -910,4 +921,266 @@ func tcpHandler(w http.ResponseWriter, r *http.Request) {
 
 	conn.Close()
 	fmt.Fprintf(w, "%s", string(reply))
+}
+
+func factoryResetHandler(w http.ResponseWriter, r *http.Request) {
+	var body []string
+	decoder := json.NewDecoder(r.Body)
+
+	if err := decoder.Decode(&body); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if len(body) == 0 {
+		http.Error(w, "No IP Bases Provided", http.StatusBadRequest)
+		return
+	}
+
+	ips := []net.IP{}
+
+	for _, ip := range body {
+		parsedIp := net.ParseIP(ip)
+		if parsedIp == nil {
+			http.Error(w, "Invalid IP Provided", http.StatusBadRequest)
+			return
+		}
+		ips = append(ips, parsedIp)
+	}
+
+	client := &http.Client{
+		Transport: &digest.Transport{
+			Username: "root",
+			Password: "root",
+		},
+		Timeout: time.Second * 5,
+	}
+
+	resCh := make(chan string)
+
+	go func() {
+		wg := sync.WaitGroup{}
+		concurrencyLimit := 200
+		semaphore := make(chan struct{}, concurrencyLimit)
+
+		for _, ip := range ips {
+			wg.Add(1)
+			semaphore <- struct{}{}
+			go func(ip net.IP) {
+				defer wg.Done()
+				defer func() { <-semaphore }()
+				apiEndpoint := "/cgi-bin/reset_conf.cgi"
+				fullURL := fmt.Sprintf("http://%s%s", ip, apiEndpoint)
+
+				res, err := client.Post(fullURL, "application/json", nil)
+				if err != nil {
+					fmt.Println(err)
+					resCh <- "error"
+					return
+				}
+				defer res.Body.Close()
+
+				if res.StatusCode >= 300 {
+					fmt.Printf("status: %d\n", res.StatusCode)
+					resCh <- "error"
+					return
+				}
+
+				resCh <- "success"
+			}(ip)
+		}
+
+		wg.Wait()
+		close(semaphore)
+		close(resCh)
+	}()
+
+	// Set headers for SSE
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+
+	// Flush the headers to the client
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "Streaming unsupported", http.StatusInternalServerError)
+		return
+	}
+
+	// stream of reboot results
+	for r := range resCh {
+		fmt.Fprintf(w, "%s\n\n", r)
+		fmt.Printf("%s", r)
+		flusher.Flush()
+	}
+}
+
+func showLogHandler(w http.ResponseWriter, r *http.Request) {
+	var body []string
+	decoder := json.NewDecoder(r.Body)
+
+	if err := decoder.Decode(&body); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if len(body) == 0 {
+		http.Error(w, "No IP Bases Provided", http.StatusBadRequest)
+		return
+	}
+
+	ips := []net.IP{}
+
+	for _, ip := range body {
+		parsedIp := net.ParseIP(ip)
+		if parsedIp == nil {
+			http.Error(w, "Invalid IP Provided", http.StatusBadRequest)
+			return
+		}
+		ips = append(ips, parsedIp)
+	}
+
+	client := &http.Client{
+		Transport: &digest.Transport{
+			Username: "root",
+			Password: "root",
+		},
+		Timeout: time.Second * 5,
+	}
+
+	resCh := make(chan string)
+
+	go func() {
+		wg := sync.WaitGroup{}
+		concurrencyLimit := 200
+		semaphore := make(chan struct{}, concurrencyLimit)
+
+		for _, ip := range ips {
+			wg.Add(1)
+			semaphore <- struct{}{}
+			go func(ip net.IP) {
+				defer wg.Done()
+				defer func() { <-semaphore }()
+				apiEndpoint := "/cgi-bin/log.cgi"
+				fullURL := fmt.Sprintf("http://%s%s", ip, apiEndpoint)
+
+				res, err := client.Get(fullURL)
+				if err != nil {
+					fmt.Println(err)
+					resCh <- "error"
+					return
+				}
+				defer res.Body.Close()
+
+				if res.StatusCode >= 300 {
+					fmt.Printf("status: %d\n", res.StatusCode)
+					resCh <- "error"
+					return
+				}
+
+				resBytes, err := io.ReadAll(res.Body)
+				if err != nil {
+					fmt.Println(err)
+					resCh <- "error"
+					return
+				}
+
+				resCh <- string(resBytes)
+			}(ip)
+		}
+
+		wg.Wait()
+		close(semaphore)
+		close(resCh)
+	}()
+
+	// Set headers for SSE
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+
+	// Flush the headers to the client
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "Streaming unsupported", http.StatusInternalServerError)
+		return
+	}
+
+	// Stream the logs
+	for r := range resCh {
+		fmt.Fprintf(w, "%s\n\n", r)
+		fmt.Printf("%s", r)
+		flusher.Flush()
+	}
+}
+
+func ipSettingsHandler(w http.ResponseWriter, r *http.Request) {
+	client := &http.Client{
+		Transport: &digest.Transport{
+			Username: "root",
+			Password: "root",
+		},
+		Timeout: time.Second * 5,
+	}
+
+	var request struct {
+		IP string `json:"ip"`
+	}
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&request); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if request.IP == "" {
+		http.Error(w, "IP address is required", http.StatusBadRequest)
+		return
+	}
+
+	apiEndpoint := "/cgi-bin/get_network_info.cgi"
+	fullURL := fmt.Sprintf("http://%s%s", request.IP, apiEndpoint)
+
+	res, err := client.Get(fullURL)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode >= 300 {
+		http.Error(w, res.Status, http.StatusInternalServerError)
+		return
+	}
+
+	resBytes, err := io.ReadAll(res.Body)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var networkInfo NetworkInfo
+	err = json.Unmarshal(resBytes, &networkInfo)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "Streaming unsupported", http.StatusInternalServerError)
+		return
+	}
+
+	jsonData, err := json.Marshal(networkInfo)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, "%s\n\n", jsonData)
+	flusher.Flush()
 }

@@ -52,7 +52,7 @@ export const RebootButton = ({
       disabled={loading}
       onClick={() => handleReboot(miners)}
     >
-      REBOOT
+      Reboot
     </Button>
   );
 };

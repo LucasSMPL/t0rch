@@ -12,6 +12,9 @@ import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ScannedIp } from "@/lib/types";
 import { RebootButton } from "./reboot-button";
+import { FactoryResetButton } from "./factory-reset-button";
+import { ShowLogsDialog } from "./antminer-log-dialog";
+import { Switch } from "@/components/ui/switch";
 
 export const MinerDetailsSheet = ({ miner }: { miner: ScannedIp }) => {
   //   const chartData = useQuery(["hashrate_history", miner.ip], async () => {
@@ -22,6 +25,9 @@ export const MinerDetailsSheet = ({ miner }: { miner: ScannedIp }) => {
   //     return res.data;
   //   });
   //   console.log(chartData.data);
+  console.log("Ideal Rate", miner.rate_ideal)
+  console.log("Pool URL", miner.url)
+  const formattedHashrate = (miner.hashrate / 1000).toFixed(2);
 
   return (
     <Sheet>
@@ -34,8 +40,12 @@ export const MinerDetailsSheet = ({ miner }: { miner: ScannedIp }) => {
           <div className="grid gap-3">
             <ul className="grid gap-3">
               <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">Antminer S21 Pro</span>
-                <span>219 / 220 TH/S</span>
+                <span className="text-muted-foreground">{miner.miner_type}</span>
+                <span>{formattedHashrate} TH/S</span>
+              </li>
+              <li className="flex items-center justify-between">
+                <span className="text-muted-foreground">IP:</span>
+                <span><a href={`http://root:root@${miner.ip}`}>{miner.ip}</a></span>
               </li>
               <li className="flex items-center justify-between">
                 <span>Control Board:</span>
@@ -45,43 +55,34 @@ export const MinerDetailsSheet = ({ miner }: { miner: ScannedIp }) => {
               </li>
               <li className="flex items-center justify-between">
                 <span>Hashboards:</span>
-                <span className="text-muted-foreground">BHB4261</span>
+                <span className="text-muted-foreground">{miner.hashboard_type}</span>
               </li>
               <li className="flex items-center justify-between">
                 <span>PSU:</span>
-                <span className="text-muted-foreground">APW12-15c</span>
+                <span className="text-muted-foreground">{miner.power_type}</span>
               </li>
             </ul>
-            <Separator className="my-2" />
-            <ul className="grid gap-3">
               <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">Pool 1:</span>
-                <span>Luxor</span>
+                <span className="text-muted-foreground">Pool:</span>
+                <span>{miner.url}</span>
               </li>
-              <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">Pool 2:</span>
-                <span>Nicehash</span>
-              </li>
-              <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">Pool 3:</span>
-                <span>Braiins</span>
-              </li>
-            </ul>
-            <Separator className="my-2" />
             <ul className="grid gap-3">
               <li className="flex items-center justify-between">
                 <span className="text-muted-foreground">Worker 1:</span>
-                <span>adamhaynes.1</span>
-              </li>
-              <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">Worker 2:</span>
-                <span>adamhaynes.2</span>
-              </li>
-              <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">Worker 3:</span>
-                <span>adamhaynes.3</span>
+                <span>{miner.worker}</span>
               </li>
             </ul>
+            <ul className="grid gap-3">
+            <li className="flex items-center justify-between">
+                <span className="text-muted-foreground">Blink:</span>
+                <span><Switch /></span>
+              </li>
+              <li className="flex items-center justify-between">
+                <span className="text-muted-foreground">FW Ver:</span>
+                <span>{miner.compile_time}</span>
+              </li>
+            </ul>
+            <Button variant={"outline"}>View Hashboards</Button>
           </div>
           <Separator className="my-4" />
           <div className="grid grid-cols-2 gap-4">
@@ -100,6 +101,12 @@ export const MinerDetailsSheet = ({ miner }: { miner: ScannedIp }) => {
               <Button style={{ backgroundColor: "#e94d1b" }}>
                 IP Settings
               </Button>
+            </div>
+            <div className="flex flex-col gap-3">
+              <ShowLogsDialog miners={[miner]} />
+            </div>
+            <div className="flex flex-col gap-3">
+              <FactoryResetButton miners={[miner]}/>
             </div>
           </div>
         </CardContent>

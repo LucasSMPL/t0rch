@@ -3,11 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ArrowBigDownDash,
-  FireExtinguisher,
   Flame,
-  FlameKindling,
   HelpCircle,
   Radar,
+  Sun,
 } from "lucide-react";
 
 import useLocalStorage from "@/hooks/use-local-storage";
@@ -63,7 +62,7 @@ export default function ScannerPage() {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState({});
 
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({is_underhashing: false, psu_failure: false,});
 
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -120,15 +119,15 @@ export default function ScannerPage() {
               },
             },
             {
-              title: "Miners Underhashing",
+              title: "Miners Not Hashing",
               icon: ArrowBigDownDash,
-              value: scannedIps.filter((x) => x.is_found && x.is_underhashing)
+              value: scannedIps.filter((x) => x.is_found && x.hashrate / 1000 == 0)
                 .length,
               filter: () => {
                 table.setColumnFilters([
                   {
-                    id: "is_underhashing",
-                    value: "true",
+                    id: "hashrate",
+                    value: "",
                   },
                 ]);
               },
@@ -262,10 +261,9 @@ const Header = ({
       />
 
       <div className="flex items-center justify-between p-4">
-        <h3 className="text-2xl font-bold text-orange-600 flex items-center">
-          <FlameKindling style={{ color: "#ffffff" }} />
-          <span className="pl-4 pr-4">t0rch | asic scanner</span>
-          <FireExtinguisher style={{ color: "#ffffff" }} />
+        <h3 className="text-2xl font-bold flex items-center">
+          <span className="pl-4 pr-4">t0rch // asic scanner</span>
+          <Sun style={{ color: "#e94d1b" }} />
         </h3>
         <div className="flex flex-col p-4 space-x-4 space-y-2">
           <div className="flex flex-row justify-end">

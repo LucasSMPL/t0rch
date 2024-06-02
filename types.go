@@ -18,6 +18,9 @@ type ScannedIp struct {
 	IsUnderhashing bool    `json:"is_underhashing"`
 	ModelFound     bool    `json:"model_found"`
 	PsuFailure     bool    `json:"psu_failure"`
+	RateIdeal      float64 `json:"rate_ideal"`   // Don't Work
+	CompileTime    string  `json:"compile_time"` // Works
+	Url            string  `json:"url"`
 }
 
 type IpSummary struct {
@@ -143,4 +146,18 @@ type IpChart struct {
 			Data []float64 `json:"data"`
 		} `json:"series"`
 	} `json:"RATE"`
+}
+
+type NetworkInfo struct {
+	Nettype        string `json:"nettype"`
+	Netdevice      string `json:"netdevice"`
+	Macaddr        string `json:"macaddr"`
+	Ipaddress      string `json:"ipaddress"`
+	Netmask        string `json:"netmask"`
+	ConfNettype    string `json:"conf_nettype"`
+	ConfHostname   string `json:"conf_hostname"`
+	ConfIpaddress  string `json:"conf_ipaddress"`
+	ConfNetmask    string `json:"conf_netmask"`
+	ConfGateway    string `json:"conf_gateway"`
+	ConfDnsservers string `json:"conf_dnsservers"`
 }

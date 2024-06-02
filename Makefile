@@ -1,6 +1,6 @@
 all:
 	cd frontend; npm install; npm run build; cd ../
-	go build -o ./tmp
+	go build -o ./tmp/
 
 # $(TARGET): main.go
 # $(GO) build $(GOFLAGS) -o $(TARGET) main.go

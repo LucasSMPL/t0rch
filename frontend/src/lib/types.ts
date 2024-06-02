@@ -13,6 +13,9 @@ export type ScannedIp = {
   is_underhashing: boolean;
   model_found: boolean;
   psu_failure: boolean;
+  rate_ideal: number; // New
+  compile_time: string;
+  url: string;
 };
 
 export type CustomBase = {
