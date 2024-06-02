@@ -67,14 +67,14 @@ jobs:
             curl \
               -X POST "https://${{env.SUPABASE_PROJECT_ID}}.supabase.co/storage/v1/object/t0rch/${next_version}/$p.gz" \
               --data-binary "@./public/${next_version}/$p.gz" \
-              -H "apikey: ${{env.SUPABASE_KEY}}" \
-              -H "Authorization: Bearer ${{env.SUPABASE_KEY}}"
+              -H "apikey: ${{env.SUPABASE_SECRET}}" \
+              -H "Authorization: Bearer ${{env.SUPABASE_SECRET}}"
               -H 'Content-Type: application/octet-stream' \
               -H "x-upsert: true"
             curl \
               -X POST "https://${{env.SUPABASE_PROJECT_ID}}.supabase.co/storage/v1/object/t0rch/$p.json" \
               --data-binary "@./public/$p.json" \
-              -H "apikey: ${{env.SUPABASE_KEY}}" \
-              -H "Authorization: Bearer ${{env.SUPABASE_KEY}}"
+              -H "apikey: ${{env.SUPABASE_SECRET}}" \
+              -H "Authorization: Bearer ${{env.SUPABASE_SECRET}}"
               -H "x-upsert: true"
           done
