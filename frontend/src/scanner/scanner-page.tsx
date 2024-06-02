@@ -1,13 +1,7 @@
 import { ModeToggle } from "@/components/mode-toggle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  ArrowBigDownDash,
-  Flame,
-  HelpCircle,
-  Radar,
-  Sun,
-} from "lucide-react";
+import { ArrowBigDownDash, Flame, HelpCircle, Radar, Sun } from "lucide-react";
 
 import useLocalStorage from "@/hooks/use-local-storage";
 import {
@@ -62,7 +56,10 @@ export default function ScannerPage() {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState({});
 
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({is_underhashing: false, psu_failure: false,});
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
+    is_underhashing: false,
+    psu_failure: false,
+  });
 
   const [sorting, setSorting] = useState<SortingState>([]);
 
@@ -121,13 +118,14 @@ export default function ScannerPage() {
             {
               title: "Miners Not Hashing",
               icon: ArrowBigDownDash,
-              value: scannedIps.filter((x) => x.is_found && x.hashrate / 1000 == 0)
-                .length,
+              value: scannedIps.filter(
+                (x) => x.is_found && x.hashrate / 1000 == 0
+              ).length,
               filter: () => {
                 table.setColumnFilters([
                   {
                     id: "hashrate",
-                    value: "",
+                    value: 0,
                   },
                 ]);
               },

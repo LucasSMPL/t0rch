@@ -18,8 +18,8 @@ type ScannedIp struct {
 	IsUnderhashing bool    `json:"is_underhashing"`
 	ModelFound     bool    `json:"model_found"`
 	PsuFailure     bool    `json:"psu_failure"`
-	RateIdeal      float64 `json:"rate_ideal"`   // Don't Work
-	CompileTime    string  `json:"compile_time"` // Works
+	RateIdeal      float64 `json:"rate_ideal"`
+	CompileTime    string  `json:"compile_time"`
 	Url            string  `json:"url"`
 }
 

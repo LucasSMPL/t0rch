@@ -32,9 +32,9 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { ScannedIp } from "@/lib/types";
 import { Dispatch, SetStateAction, useState } from "react";
+import AntminerHashboardView from "./antminer-hashboards";
 import { MinerDetailsSheet } from "./miner-details-sheet";
 import { RebootButton } from "./reboot-button";
-import AntminerHashboardView from "./antminer-hashboards";
 // import AntminerIPSettings from "./antminer-ip-settings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -152,8 +152,7 @@ export default function ScanTable({
           <CardDescription>t0rch is in beta, launching 2024.</CardDescription>
         </div>
         <div className="flex justify-end pb-5">
-        
-        <Dialog >
+          <Dialog>
             <DialogTrigger>
               <Button
                 variant={"outline"}
@@ -167,78 +166,83 @@ export default function ScanTable({
               <DialogHeader>
                 <DialogTitle>Change IP Settings</DialogTitle>
                 <DialogDescription>
-                  Please modify the internet protocol information below, and click update. 
+                  Please modify the internet protocol information below, and
+                  click update.
                 </DialogDescription>
               </DialogHeader>
               {/* <SelectSeparator /> */}
               <div className="grid gap-3 pt-10">
-            <ul className="grid gap-3">
-              <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">Protocol</span>
-                <span style={{ color: "#e94d1b" }}>Static</span>
-              </li>
-              <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">IP</span>
-                <span style={{ color: "#e94d1b" }}><a href="http://root:root@ip" target="_blank">$ip</a>10.0.0.0</span>
-              </li>
-              <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">MAC</span>
-                <span style={{ color: "#e94d1b" }}>AB:CD:EF:GH:1</span>
-              </li>
-            </ul>
-          </div>
-          <Tabs defaultValue="static">
-          <div className="flex items-center justify-center">
-            <TabsList>
-                <TabsTrigger value="static">Static</TabsTrigger>
-                <TabsTrigger value="dhcp">DHCP</TabsTrigger>
-            </TabsList>
-            </div>
-            <TabsContent value="static">
-            <div className="grid grid-cols-1 gap-4 pt-10">
-                <Label>IP Address</Label>
-                <Input
-                  className="col-span-1"
-                  placeholder="IP Address"
-                  name="ip"
-                />
-                 <Label>Netmask</Label>
-                <Input
-                  className="col-span-1"
-                  placeholder="Netmask"
-                  name="netmask"
-                />
-                 <Label>Gateway</Label>
-                <Input
-                  className="col-span-1"
-                  placeholder="Gateway"
-                  name="gateway"
-                />
-                 <Label>DNS Server</Label>
-                <Input
-                  className="col-span-1"
-                  placeholder="DNS Server"
-                  name="dns"
-                />
+                <ul className="grid gap-3">
+                  <li className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Protocol</span>
+                    <span style={{ color: "#e94d1b" }}>Static</span>
+                  </li>
+                  <li className="flex items-center justify-between">
+                    <span className="text-muted-foreground">IP</span>
+                    <span style={{ color: "#e94d1b" }}>
+                      <a href="http://root:root@ip" target="_blank">
+                        $ip
+                      </a>
+                      10.0.0.0
+                    </span>
+                  </li>
+                  <li className="flex items-center justify-between">
+                    <span className="text-muted-foreground">MAC</span>
+                    <span style={{ color: "#e94d1b" }}>AB:CD:EF:GH:1</span>
+                  </li>
+                </ul>
               </div>
-            </TabsContent>
-            <TabsContent value="dhcp">
-                <div className="flex items-center justify-center pt-10 pb-10">
-                <Label>Your miner will auto configure the network configuration to DHCP Protocol.</Label>
+              <Tabs defaultValue="static">
+                <div className="flex items-center justify-center">
+                  <TabsList>
+                    <TabsTrigger value="static">Static</TabsTrigger>
+                    <TabsTrigger value="dhcp">DHCP</TabsTrigger>
+                  </TabsList>
                 </div>
-            </TabsContent>
-          </Tabs>
+                <TabsContent value="static">
+                  <div className="grid grid-cols-1 gap-4 pt-10">
+                    <Label>IP Address</Label>
+                    <Input
+                      className="col-span-1"
+                      placeholder="IP Address"
+                      name="ip"
+                    />
+                    <Label>Netmask</Label>
+                    <Input
+                      className="col-span-1"
+                      placeholder="Netmask"
+                      name="netmask"
+                    />
+                    <Label>Gateway</Label>
+                    <Input
+                      className="col-span-1"
+                      placeholder="Gateway"
+                      name="gateway"
+                    />
+                    <Label>DNS Server</Label>
+                    <Input
+                      className="col-span-1"
+                      placeholder="DNS Server"
+                      name="dns"
+                    />
+                  </div>
+                </TabsContent>
+                <TabsContent value="dhcp">
+                  <div className="flex items-center justify-center pt-10 pb-10">
+                    <Label>
+                      Your miner will auto configure the network configuration
+                      to DHCP Protocol.
+                    </Label>
+                  </div>
+                </TabsContent>
+              </Tabs>
               <DialogFooter className="flex justify-center items-center">
-                <Button
-                  className="mx-auto"
-                >
-                  Update IP Settings
-                </Button>
+                <Button className="mx-auto">Update IP Settings</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
 
-        <AntminerHashboardView />
+          <AntminerHashboardView />
           <Button style={{ backgroundColor: "#e94d1b" }} className="mr-4">
             Reboot All
           </Button>
@@ -525,7 +529,10 @@ export const ScanTableColumns: ColumnDef<ScannedIp>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex items-center">
-          <span>{row.original.miner_type} ({(row.original.rate_ideal / 1000).toFixed(0)} TH)</span>
+          <span>
+            {row.original.miner_type} (
+            {(row.original.rate_ideal / 1000).toFixed(0)} TH)
+          </span>
         </div>
       );
     },
@@ -583,8 +590,8 @@ export const ScanTableColumns: ColumnDef<ScannedIp>[] = [
         </div>
       );
     },
-    filterFn: (row, _id, _value) => {
-      return row.original.hashrate / 1000 == 0;
+    filterFn: (row, _id, value) => {
+      return row.original.is_found && row.original.hashrate / 1000 == value;
     },
   },
   {

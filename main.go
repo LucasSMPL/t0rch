@@ -10,6 +10,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 	"sync"
@@ -38,6 +39,8 @@ func main() {
 		ForceCheck:     true,
 		OnSuccessfulUpdate: func() {
 			log.Println("-----------------Successfully Updated-----------------")
+			log.Println("-------------------Please Restart--------------------")
+			os.Exit(0)
 		},
 	}
 
@@ -58,7 +61,7 @@ func main() {
 	router.HandleFunc("POST /pool", poolHandler)                            // Change Pool Antminer
 	router.HandleFunc("POST /factory_reset", factoryResetHandler)           // Factory Reset Antminer
 	router.HandleFunc("GET /log", showLogHandler)                           // Show Log Antminer
-	router.HandleFunc("GET /ip_settings", ipSettingsHandler)                // Get Network Info Antminer
+	router.HandleFunc("GET /network/{ip}", networkHandler)                  // Get Network Info Antminer
 	router.HandleFunc("POST /tcp", tcpHandler)                              // Find Whatsminer
 
 	server := http.Server{
@@ -304,6 +307,10 @@ func getMinerData(
 
 	fanNum := 0
 	chainNum := 0
+	if len(ipStats.Stats) > 0 {
+		fanNum = ipStats.Stats[0].FanNum
+		chainNum = ipStats.Stats[0].ChainNum
+	}
 
 	controller := "N/A"
 	powerType := "Unknown"
@@ -1114,7 +1121,14 @@ func showLogHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func ipSettingsHandler(w http.ResponseWriter, r *http.Request) {
+func networkHandler(w http.ResponseWriter, r *http.Request) {
+	var param = r.PathValue("ip")
+	var ip = net.ParseIP(param)
+
+	if ip == nil {
+		http.Error(w, "Invalid IP Provided", http.StatusBadRequest)
+		return
+	}
 	client := &http.Client{
 		Transport: &digest.Transport{
 			Username: "root",
@@ -1123,22 +1137,8 @@ func ipSettingsHandler(w http.ResponseWriter, r *http.Request) {
 		Timeout: time.Second * 5,
 	}
 
-	var request struct {
-		IP string `json:"ip"`
-	}
-	decoder := json.NewDecoder(r.Body)
-	if err := decoder.Decode(&request); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	if request.IP == "" {
-		http.Error(w, "IP address is required", http.StatusBadRequest)
-		return
-	}
-
 	apiEndpoint := "/cgi-bin/get_network_info.cgi"
-	fullURL := fmt.Sprintf("http://%s%s", request.IP, apiEndpoint)
+	fullURL := fmt.Sprintf("http://%s%s", ip, apiEndpoint)
 
 	res, err := client.Get(fullURL)
 	if err != nil {
@@ -1165,22 +1165,11 @@ func ipSettingsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/event-stream")
-	w.Header().Set("Cache-Control", "no-cache")
-	w.Header().Set("Connection", "keep-alive")
-
-	flusher, ok := w.(http.Flusher)
-	if !ok {
-		http.Error(w, "Streaming unsupported", http.StatusInternalServerError)
-		return
-	}
-
 	jsonData, err := json.Marshal(networkInfo)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	fmt.Fprintf(w, "%s\n\n", jsonData)
-	flusher.Flush()
+	fmt.Fprint(w, jsonData)
 }
