@@ -2,9 +2,8 @@ name: Generate Binaries
 
 on:
   push:
-    branches: ["dev"]
-    # branches: ['main']
-    # paths: ['config.t0rch.json']
+    branches: ['main']
+    paths: ['config.t0rch.json']
 
 jobs:
   gen_binaries:
