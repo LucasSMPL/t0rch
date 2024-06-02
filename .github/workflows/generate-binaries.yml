@@ -2,17 +2,21 @@ name: Generate Binaries
 
 on:
   push:
-    branches: ['main']
-    paths: ['config.t0rch.json']
+    branches: ["dev"]
+    # branches: ['main']
+    # paths: ['config.t0rch.json']
 
 jobs:
-  test:
+  gen_binaries:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: write
-
     env:
+      SUPABASE_PROJECT_ID: conqcdxbczhqszglmwyk
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      SUPABASE_SECRET: ${{ secrets.SUPABASE_SECRET }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
       SUPPORTED_PLATFORMS: |
         ( 
           "darwin-amd64" 
@@ -23,27 +27,26 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
-      
+
       - name: Setup Node environment
         uses: actions/setup-node@v4
         with:
           node-version: 18
-        
+
       - name: Build Frontend
         run: |
           cd frontend
           npm install
           npm run build
           cd ../
-      
+
       - name: Setup Go environment
         uses: actions/setup-go@v5.0.1
-      
+
       - name: Install go-selfupdate
         run: go install github.com/sanbornm/go-selfupdate/cmd/go-selfupdate@latest
-      
-      
-      - name: Generate Binaries
+
+      - name: Generate Binaries and Upload to Supabase
         run: |
           next_version=$(cat config.t0rch.json | jq -r '.version')
           echo ${next_version}
@@ -56,11 +59,20 @@ jobs:
             GOOS=$goos GOARCH=$goarch go build -o tmp/$p
           done
           ~/go/bin/go-selfupdate ./tmp ${next_version}
-      
-      - name: Commit Generated Binaries
-        run: |
-          git config --global user.name 'muezz'
-          git config --global user.email 'muezz7055@gmail.com'
-          git add .
-          git commit -am "t0rch version bump"
-          git push
+          platforms=${{ env.SUPPORTED_PLATFORMS }}
+          for p in ${platforms[*]}
+          do
+            curl \
+              -X POST "https://${{env.SUPABASE_PROJECT_ID}}.supabase.co/storage/v1/object/t0rch/${next_version}/$p.gz" \
+              --data-binary "@/public/${next_version}/$p.gz" \
+              -H "apikey: ${{env.SUPABASE_KEY}}" \
+              -H "Authorization: Bearer ${{env.SUPABASE_KEY}}"
+              -H 'Content-Type: application/octet-stream' \
+              -H "x-upsert: true"
+            curl \
+              -X POST "https://${{env.SUPABASE_PROJECT_ID}}.supabase.co/storage/v1/object/t0rch/$p.json" \
+              --data-binary "@/public/$p.json" \
+              -H "apikey: ${{env.SUPABASE_KEY}}" \
+              -H "Authorization: Bearer ${{env.SUPABASE_KEY}}"
+              -H "x-upsert: true"
+          done

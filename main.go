@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/icholy/digest"
+	"github.com/sanbornm/go-selfupdate/selfupdate"
 	"github.com/skratchdot/open-golang/open"
 )
 
@@ -24,18 +25,23 @@ var reactFS embed.FS
 
 func main() {
 
-	// var version = GetVersion()
+	var version = GetVersion()
 
-	// var updater = &selfupdate.Updater{
-	// 	CurrentVersion: version,                                               // the current version of your app used to determine if an update is necessary
-	// 	ApiURL:         "https://github.com/LucasSMPL/t0rch/tree/main/public", // endpoint to get update manifest
-	// 	BinURL:         "https://github.com/LucasSMPL/t0rch/tree/main/public", // endpoint to get full binaries
-	// 	DiffURL:        "https://github.com/LucasSMPL/t0rch/tree/main/public", // endpoint to get binary diff/patches
-	// 	// Dir:     "tmp/",                                                                     // directory relative to your app to store temporary state files related to go-selfupdate
-	// 	CmdName: "t0rch",
-	// }
+	var binUrl = "https://conqcdxbczhqszglmwyk.supabase.co/storage/v1/object/public/"
 
-	// go updater.BackgroundRun()
+	var updater = &selfupdate.Updater{
+		CurrentVersion: version,
+		ApiURL:         binUrl,
+		BinURL:         binUrl,
+		DiffURL:        binUrl,
+		CmdName:        "t0rch",
+		ForceCheck:     true,
+		OnSuccessfulUpdate: func() {
+			log.Println("-----------------Successfully Updated-----------------")
+		},
+	}
+
+	go updater.BackgroundRun()
 
 	distFS, err := fs.Sub(reactFS, "frontend/dist")
 	if err != nil {
