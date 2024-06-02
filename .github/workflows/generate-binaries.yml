@@ -66,15 +66,16 @@ jobs:
           do
             curl \
               -X POST "https://${{env.SUPABASE_PROJECT_ID}}.supabase.co/storage/v1/object/t0rch/${next_version}/$p.gz" \
-              --data-binary "@./public/${next_version}/$p.gz" \
-              -H "apikey: ${{env.SUPABASE_SECRET}}" \
-              -H "Authorization: Bearer ${{env.SUPABASE_SECRET}}"
-              -H 'Content-Type: application/octet-stream' \
-              -H "x-upsert: true"
-            curl \
+              --header "apikey: ${{env.SUPABASE_SECRET}}" \
+              --header "Authorization: Bearer ${{env.SUPABASE_SECRET}}"
+              --header "Content-Type: application/octet-stream" \
+              --header "x-upsert: true" \
+              --data-binary "@./public/${next_version}/$p.gz"
+              curl \
               -X POST "https://${{env.SUPABASE_PROJECT_ID}}.supabase.co/storage/v1/object/t0rch/$p.json" \
-              --data-binary "@./public/$p.json" \
-              -H "apikey: ${{env.SUPABASE_SECRET}}" \
-              -H "Authorization: Bearer ${{env.SUPABASE_SECRET}}"
-              -H "x-upsert: true"
+              --header "apikey: ${{env.SUPABASE_SECRET}}" \
+              --header "Authorization: Bearer ${{env.SUPABASE_SECRET}}"
+              --header "Content-Type: application/octet-stream" \
+              --header "x-upsert: true" \
+              --data-binary "@./public/$p.json"
           done
