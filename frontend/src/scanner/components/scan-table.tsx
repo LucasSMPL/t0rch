@@ -37,6 +37,8 @@ import { MinerDetailsSheet } from "./miner-details-sheet";
 import { RebootButton } from "./reboot-button";
 // import AntminerIPSettings from "./antminer-ip-settings";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 
 interface Pool {
   url: string;
@@ -152,6 +154,7 @@ export default function ScanTable({
           <CardDescription>t0rch is in beta, launching 2024.</CardDescription>
         </div>
         <div className="flex justify-end pb-5">
+          
           <Dialog>
             <DialogTrigger>
               <Button
@@ -295,7 +298,22 @@ export default function ScanTable({
               </DialogHeader>
               <div className="grid grid-cols-1 gap-4 py-4">
                 <div className="flex flex-col space-y-1.5">
-                  <Label htmlFor="file">File Upload </Label>
+                <Select>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select A Firmware by Bitmain" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Bitmain Firmwares</SelectLabel>
+                      <SelectItem value="apple">S21 - 6/3/2024</SelectItem>
+                      <SelectItem value="banana">S19 XP - 2/1/2024</SelectItem>
+                      <SelectItem value="blueberry">S19k Pro - 12/3/2024</SelectItem>
+                      <SelectItem value="grapes">S19 Pro - 6/16/2024</SelectItem>
+                      <SelectItem value="pineapple">S19 - 4/3/2024</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                  <Label className="pt-10" htmlFor="file">File Upload </Label>
                   <Input
                     className="w-full"
                     id="file"

@@ -8,13 +8,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+// import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ScannedIp } from "@/lib/types";
 import { RebootButton } from "./reboot-button";
-import { FactoryResetButton } from "./factory-reset-button";
-import { ShowLogsDialog } from "./antminer-log-dialog";
+// import { FactoryResetButton } from "./factory-reset-button";
+// import { ShowLogsDialog } from "./antminer-log-dialog";
 import { Switch } from "@/components/ui/switch";
+import { FactoryResetButton } from "./factory-reset-button";
 
 export const MinerDetailsSheet = ({ miner }: { miner: ScannedIp }) => {
   //   const chartData = useQuery(["hashrate_history", miner.ip], async () => {
@@ -82,9 +83,14 @@ export const MinerDetailsSheet = ({ miner }: { miner: ScannedIp }) => {
                 <span>{miner.compile_time}</span>
               </li>
             </ul>
+            <RebootButton miners={[miner]} />
             <Button variant={"outline"}>View Hashboards</Button>
+            <Button variant={"outline"}>Change Pools</Button>
+            <Button variant={"outline"}>Network Settings</Button>
+            <Button variant={"outline"}>Read Logs</Button>
+            <FactoryResetButton miners={[miner]}/>
           </div>
-          <Separator className="my-4" />
+          {/* <Separator className="my-4" />
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-3">
               <RebootButton miners={[miner]} />
@@ -108,7 +114,7 @@ export const MinerDetailsSheet = ({ miner }: { miner: ScannedIp }) => {
             <div className="flex flex-col gap-3">
               <FactoryResetButton miners={[miner]}/>
             </div>
-          </div>
+          </div> */}
         </CardContent>
       </SheetContent>
     </Sheet>

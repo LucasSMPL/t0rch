@@ -48,11 +48,12 @@ export const RebootButton = ({
   };
   return (
     <Button
+    variant={"outline"}
       className="mr-4"
       disabled={loading}
       onClick={() => handleReboot(miners)}
     >
-      Reboot
+      Reboot Miner
     </Button>
   );
 };
