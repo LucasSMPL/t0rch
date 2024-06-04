@@ -2,6 +2,15 @@ all:
 	cd frontend; npm install; npm run build; cd ../
 	go build -o ./tmp/
 
+run:
+	cd frontend; npm install; npm run build; cd ../
+	go build -o ./tmp/
+	./tmp/t0rch
+
+windows:
+	cd frontend; npm install; npm run build; cd ../
+	GOOS=windows GOARCH=amd64 go build -o ./tmp/
+
 # $(TARGET): main.go
 # $(GO) build $(GOFLAGS) -o $(TARGET) main.go
 
