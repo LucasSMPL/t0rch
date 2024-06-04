@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net"
 	"net/http"
 	"time"
@@ -39,5 +38,6 @@ func NetworkHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprint(w, jsonData)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonData)
 }

@@ -23,24 +23,11 @@ export type CustomBase = {
   base: string;
 };
 
-export type HashrateHistoryApiRes = {
-  STATUS: {
-    STATUS: string;
-    when: number;
-    Msg: string;
-    api_version: string;
-  };
-  INFO: {
-    miner_version: string;
-    CompileTime: string;
-    type: string;
-  };
-  RATE: {
-    unit: string;
-    xAxis: string[];
-    series: {
-      name: string;
-      data: number[];
-    }[];
+export type ChartApiRes = {
+  unit: string;
+  xAxis: string[];
+  series: {
+    name: string;
+    data: number[];
   }[];
 };

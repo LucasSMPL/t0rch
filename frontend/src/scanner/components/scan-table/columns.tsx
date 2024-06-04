@@ -3,6 +3,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ColumnDef } from "@tanstack/react-table";
 
 import { ScannedIp } from "@/lib/types";
+import { MinerDetailsSheet } from "../miner-details-sheet/miner-details-sheet";
 // import AntminerIPSettings from "./antminer-ip-settings";
 
 export const ScanTableColumns: ColumnDef<ScannedIp>[] = [
@@ -234,13 +235,13 @@ export const ScanTableColumns: ColumnDef<ScannedIp>[] = [
       return row.original.is_underhashing == value;
     },
   },
-  //   {
-  //     accessorKey: "miner_details",
-  //     header: "",
-  //     cell: ({ row }) => {
-  //       return <MinerDetailsSheet miner={row.original} />;
-  //     },
-  //   },
+  {
+    accessorKey: "miner_details",
+    header: "",
+    cell: ({ row }) => {
+      return <MinerDetailsSheet miner={row.original} />;
+    },
+  },
 
   // ACTIONS NEED BUILT FROM SCRATCH
   // {

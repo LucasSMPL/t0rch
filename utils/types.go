@@ -127,25 +127,12 @@ type MinerModel struct {
 }
 
 type IpChart struct {
-	Status struct {
-		Status     string  `json:"STATUS"`
-		When       float64 `json:"when"`
-		Msg        string  `json:"Msg"`
-		ApiVersion string  `json:"api_version"`
-	} `json:"STATUS"`
-	Info struct {
-		MinerVersion string `json:"miner_version"`
-		CompileTime  string `json:"CompileTime"`
-		Type         string `json:"type"`
-	} `json:"INFO"`
-	Rate []struct {
-		Unit   string   `json:"unit"`
-		Xaxis  []string `json:"xAxis"`
-		Series []struct {
-			Name string    `json:"name"`
-			Data []float64 `json:"data"`
-		} `json:"series"`
-	} `json:"RATE"`
+	Unit   string   `json:"unit"`
+	Xaxis  []string `json:"xAxis"`
+	Series []struct {
+		Name string    `json:"name"`
+		Data []float64 `json:"data"`
+	} `json:"series"`
 }
 
 type NetworkInfo struct {

@@ -35,8 +35,8 @@ func GetMinerChart(
 		return nil
 	}
 
-	var ipChart utils.IpChart
-	err = json.Unmarshal(resBytes, &ipChart)
+	var chartRes ChartApiRes
+	err = json.Unmarshal(resBytes, &chartRes)
 	if err != nil {
 		fmt.Println(err)
 		return nil
@@ -44,5 +44,35 @@ func GetMinerChart(
 
 	io.Copy(io.Discard, res.Body)
 
-	return &ipChart
+	if len(chartRes.Rate) == 0 {
+		return nil
+	}
+
+	return &utils.IpChart{
+		Unit:   chartRes.Rate[0].Unit,
+		Xaxis:  chartRes.Rate[0].Xaxis,
+		Series: chartRes.Rate[0].Series,
+	}
+}
+
+type ChartApiRes struct {
+	Status struct {
+		Status     string  `json:"STATUS"`
+		When       float64 `json:"when"`
+		Msg        string  `json:"Msg"`
+		ApiVersion string  `json:"api_version"`
+	} `json:"STATUS"`
+	Info struct {
+		MinerVersion string `json:"miner_version"`
+		CompileTime  string `json:"CompileTime"`
+		Type         string `json:"type"`
+	} `json:"INFO"`
+	Rate []struct {
+		Unit   string   `json:"unit"`
+		Xaxis  []string `json:"xAxis"`
+		Series []struct {
+			Name string    `json:"name"`
+			Data []float64 `json:"data"`
+		} `json:"series"`
+	} `json:"RATE"`
 }

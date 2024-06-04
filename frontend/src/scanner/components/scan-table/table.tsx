@@ -58,6 +58,7 @@ import {
 import AntminerHashboardView from "../antminer-hashboards";
 import { BlinkAction } from "../miner-actions/blink";
 import { ChangePoolsAction } from "../miner-actions/change-pools";
+import { NukeAction } from "../miner-actions/nuke";
 import { ScanTableColumns } from "./columns";
 
 export default function ScanTable() {
@@ -289,6 +290,7 @@ export default function ScanTable() {
           </Dialog>
           {Object.keys(selectedIps).length > 0 && (
             <>
+              <NukeAction />
               <BlinkAction
                 miners={table
                   .getSelectedRowModel()

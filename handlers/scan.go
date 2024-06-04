@@ -61,6 +61,7 @@ func ScanHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resCh := make(chan utils.ScannedIp)
+	ctx := r.Context()
 
 	go func() {
 		scanAllIps(client, ips, resCh, *models)
@@ -80,15 +81,23 @@ func ScanHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// stream of scanned IPs
-	for r := range resCh {
-		jsonData, err := json.Marshal(r)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+	for {
+		select {
+		case <-ctx.Done():
+			log.Println("Scan aborted by the client")
 			return
+		case r, ok := <-resCh:
+			if !ok {
+				return
+			}
+			jsonData, err := json.Marshal(r)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			fmt.Fprintf(w, "%s\n\n", jsonData)
+			flusher.Flush()
 		}
-		fmt.Fprintf(w, "%s\n\n", jsonData)
-		fmt.Printf("%s", jsonData)
-		flusher.Flush()
 	}
 }
 

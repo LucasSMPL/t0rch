@@ -10,10 +10,9 @@ import {
   useSelectedIps,
 } from "@/stores/scanner";
 import { LucideIcon } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
 import { ScannedIp } from "../lib/types";
-import { NukeDialog } from "./components/nuke-dialog";
 import ScanTable from "./components/scan-table/table";
 import { SelectIpBaseSheet } from "./components/select-ip-base-sheet";
 
@@ -145,16 +144,24 @@ const InfoCard = ({
   );
 };
 
-const IS_IN_SITE = false;
+const IS_IN_SITE = true;
 
 const Header = () => {
+  const abortControllerRef = useRef<AbortController | null>(null);
   const selectedBases = useLocalStorage<string[]>("selected-ip-bases", []);
 
   const { progress, resetProgress, setScannedIps, reset } = useScannedIps();
 
   const startScan = async () => {
+    if (progress != 0) {
+      abortControllerRef.current?.abort();
+      resetProgress();
+      return;
+    }
     reset();
+    abortControllerRef.current = new AbortController();
     const response = await fetch("http://localhost:7070/scan", {
+      signal: abortControllerRef.current.signal,
       method: "POST",
       headers: {
         "Content-Type": "text/event-stream",
@@ -213,13 +220,14 @@ const Header = () => {
   };
   return (
     <>
-      <LoadingBar
-        color="#ffffff"
-        progress={(progress / (selectedBases.value.length * 255)) * 100}
-        height={5}
-        onLoaderFinished={() => resetProgress()}
-      />
-
+      {progress != 0 && (
+        <LoadingBar
+          color="#ffffff"
+          progress={(progress / (selectedBases.value.length * 255)) * 100}
+          height={5}
+          onLoaderFinished={() => resetProgress()}
+        />
+      )}
       <div className="flex items-center justify-between p-4">
         <h3 className="text-2xl font-bold flex items-center">
           <span className="pl-4 pr-4">t0rch // asic scanner</span>
@@ -227,7 +235,6 @@ const Header = () => {
         </h3>
         <div className="flex flex-col p-4 space-x-4 space-y-2">
           <div className="flex flex-row justify-end">
-            <NukeDialog />
             <SelectIpBaseSheet />
             <Button
               variant="outline"
@@ -235,7 +242,7 @@ const Header = () => {
               style={{ borderColor: "#e94d1b" }}
               onClick={IS_IN_SITE ? startScan : testScan}
             >
-              Scan Network
+              {progress == 0 ? "Scan Network" : "Stop Scanning"}
             </Button>
             <ModeToggle />
           </div>

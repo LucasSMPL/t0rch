@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ZapOff } from "lucide-react";
 
-export const NukeDialog = () => {
+export const NukeAction = () => {
   return (
     <AlertDialog>
       <AlertDialogTrigger>

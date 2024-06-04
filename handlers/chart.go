@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net"
 	"net/http"
 	"time"
@@ -40,6 +39,6 @@ func ChartHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "%v", jsonData)
-
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonData)
 }
