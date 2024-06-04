@@ -61,6 +61,8 @@ func main() {
 	router.HandleFunc("POST /reboot", handlers.RebootHandler) // Reboot Antminer
 	router.HandleFunc("POST /pools", handlers.PoolsHandler)   // Change Pool Antminer
 	router.HandleFunc("POST /reset", handlers.ResetHandler)   // Factory Reset Antminer
+	router.HandleFunc("POST /nuke", handlers.NukeHandler)     // Sleep Antminer
+	router.HandleFunc("POST /wake", handlers.WakeHandler)     // Wake Up Antminer
 
 	// miner info
 	router.HandleFunc("GET /chart/{ip}", handlers.ChartHandler)     // Hashrate Chart Antminer
