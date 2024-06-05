@@ -76,11 +76,8 @@ const NetworkData = ({ miner }: { miner: ScannedIp }) => {
           <li className="flex items-center justify-between">
             <span className="text-muted-foreground">IP</span>
             <span style={{ color: "#e94d1b" }}>
-              <a href="http://root:root@ip" target="_blank">
-                $ip
-              </a>
-              {miner.ip}
-            </span>
+                  <a href={`http://root:root@${miner.ip}`} target="_blank">{miner.ip}</a>
+                </span>
           </li>
           <li className="flex items-center justify-between">
             <span className="text-muted-foreground">MAC</span>
