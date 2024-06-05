@@ -27,7 +27,7 @@ import { useForm } from "react-hook-form";
 import { useMutation, useQuery } from "react-query";
 import { z } from "zod";
 
-const ChnagePoolsFormSchema = z.object({
+const ChangePoolsFormSchema = z.object({
   pools: z
     .array(
       z.object({
@@ -43,27 +43,29 @@ export const ChangePoolsAction = ({ miners }: { miners: ScannedIp[] }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
 
-  const existingPools = useQuery(
-    ["pools"],
-    async () => {
-      const response = await axios.get<
-        z.infer<typeof ChnagePoolsFormSchema>["pools"]
-      >(`http://localhost:7070/pools/${miners.at(0)!.ip}`);
-      return response.data;
-    },
-    {
-      enabled: miners.length === 1,
-    }
-  );
-
-  const form = useForm<z.infer<typeof ChnagePoolsFormSchema>>({
-    resolver: zodResolver(ChnagePoolsFormSchema),
+  const form = useForm<z.infer<typeof ChangePoolsFormSchema>>({
+    resolver: zodResolver(ChangePoolsFormSchema),
     defaultValues: {
-      pools: miners.length === 1 ? existingPools.data : undefined,
+      pools: undefined,
     },
   });
 
-  function onSubmit(values: z.infer<typeof ChnagePoolsFormSchema>) {
+  useQuery(
+    ["pools"],
+    async () => {
+      const response = await axios.get<
+        z.infer<typeof ChangePoolsFormSchema>["pools"]
+      >(`http://localhost:7070/pools/${miners.at(0)!.ip}`);
+
+      form.setValue("pools", response.data);
+      return response.data;
+    },
+    {
+      enabled: miners.length === 1 && isOpen,
+    }
+  );
+
+  function onSubmit(values: z.infer<typeof ChangePoolsFormSchema>) {
     console.log(values);
     changePools.mutate({ m: miners, pools: values.pools });
   }
@@ -74,7 +76,7 @@ export const ChangePoolsAction = ({ miners }: { miners: ScannedIp[] }) => {
       pools,
     }: {
       m: ScannedIp[];
-      pools: z.infer<typeof ChnagePoolsFormSchema>["pools"];
+      pools: z.infer<typeof ChangePoolsFormSchema>["pools"];
     }) => {
       await axios.post("http://localhost:7070/change-pools", {
         ips: m.map((x) => x.ip),
@@ -110,68 +112,70 @@ export const ChangePoolsAction = ({ miners }: { miners: ScannedIp[] }) => {
           Change Pools
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[850px]">
-        <DialogHeader>
-          <DialogTitle>Changing Pools</DialogTitle>
-          <DialogDescription>
-            Please enter your stratum url, worker/account, and password below.
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            {[0, 1, 2].map((index) => (
-              <div key={index} className="grid grid-cols-12 gap-4 py-4">
-                <FormField
-                  control={form.control}
-                  name={`pools.${index}.url`}
-                  render={({ field }) => (
-                    <FormItem className="col-span-6">
-                      <FormLabel>URL</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Pool URL" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`pools.${index}.user`}
-                  render={({ field }) => (
-                    <FormItem className="col-span-4">
-                      <FormLabel>User</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Username" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`pools.${index}.pass`}
-                  render={({ field }) => (
-                    <FormItem className="col-span-2">
-                      <FormLabel>Pass</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Password"
-                          type="password"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            ))}
-            <DialogFooter className="flex justify-center items-center">
-              <Button type="submit">Update Pools</Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
+      {isOpen && (
+        <DialogContent className="sm:max-w-[850px]">
+          <DialogHeader>
+            <DialogTitle>Changing Pools</DialogTitle>
+            <DialogDescription>
+              Please enter your stratum url, worker/account, and password below.
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              {[0, 1, 2].map((index) => (
+                <div key={index} className="grid grid-cols-12 gap-4 py-4">
+                  <FormField
+                    control={form.control}
+                    name={`pools.${index}.url`}
+                    render={({ field }) => (
+                      <FormItem className="col-span-6">
+                        <FormLabel>URL</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Pool URL" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`pools.${index}.user`}
+                    render={({ field }) => (
+                      <FormItem className="col-span-4">
+                        <FormLabel>User</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Username" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name={`pools.${index}.pass`}
+                    render={({ field }) => (
+                      <FormItem className="col-span-2">
+                        <FormLabel>Pass</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Password"
+                            type="password"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              ))}
+              <DialogFooter className="flex justify-center items-center">
+                <Button type="submit">Update Pools</Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      )}
     </Dialog>
   );
 };

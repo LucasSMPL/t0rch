@@ -31,3 +31,18 @@ export type ChartApiRes = {
     data: number[];
   }[];
 };
+
+export type NetworkInfo  = {
+	nettype: string
+	netdevice: string
+	macaddr: string
+	ipaddress: string
+	netmask: string
+	conf_nettype: string
+	conf_hostname: string
+	conf_ipaddress: string
+	conf_netmask: string
+	conf_gateway: string
+	conf_dnsservers: string
+}
+

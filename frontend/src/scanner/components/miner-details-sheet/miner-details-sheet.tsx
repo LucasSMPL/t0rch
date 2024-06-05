@@ -6,8 +6,10 @@ import { Switch } from "@/components/ui/switch";
 import { ScannedIp } from "@/lib/types";
 import { useState } from "react";
 import { FactoryResetButton } from "../factory-reset-button";
+import { ChangePoolsAction } from "../miner-actions/change-pools";
 import { RebootAction } from "../miner-actions/reboot";
 import { HashrateChart } from "./components/hashrate-chart";
+import { NetworkDialog } from "./components/network-dialog";
 
 export const MinerDetailsSheet = ({ miner }: { miner: ScannedIp }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -79,8 +81,8 @@ export const MinerDetailsSheet = ({ miner }: { miner: ScannedIp }) => {
             </ul>
             <RebootAction miners={[miner]} />
             <Button variant={"outline"}>View Hashboards</Button>
-            <Button variant={"outline"}>Change Pools</Button>
-            <Button variant={"outline"}>Network Settings</Button>
+            <ChangePoolsAction miners={[miner]} />
+            <NetworkDialog miner={miner} />
             <Button variant={"outline"}>Read Logs</Button>
             <FactoryResetButton miners={[miner]} />
           </div>
