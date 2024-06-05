@@ -1,9 +1,11 @@
 package miners
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"net/http"
 
@@ -45,4 +47,41 @@ func GetMinerConf(
 	io.Copy(io.Discard, res.Body)
 
 	return &ipMinerConf
+}
+
+type IpConfPayload struct {
+	MinerMode int `json:"miner-mode"`
+	Pools     []struct {
+		URL  string `json:"url"`
+		User string `json:"user"`
+		Pass string `json:"pass"`
+	} `json:"pools"`
+}
+
+func SetMinerConf(
+	client *http.Client,
+	ip net.IP,
+	payload IpConfPayload,
+) error {
+	apiEndpoint := "/cgi-bin/set_miner_conf.cgi"
+	fullURL := fmt.Sprintf("http://%s%s", ip, apiEndpoint)
+
+	marshalled, err := json.Marshal(payload)
+	if err != nil {
+		log.Fatalf("impossible to marshall config: %s", err)
+		return err
+	}
+	res, err := client.Post(fullURL, "application/json", bytes.NewReader(marshalled))
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode >= 300 {
+		fmt.Printf("status: %d\n", res.StatusCode)
+		return fmt.Errorf("status: %d", res.StatusCode)
+	}
+
+	return nil
 }

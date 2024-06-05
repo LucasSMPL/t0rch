@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ColumnFilter,
@@ -28,27 +27,7 @@ import {
 import { flexRender } from "@tanstack/react-table";
 
 import { CardDescription } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   useScanFilters,
   useScannedIps,
@@ -56,7 +35,8 @@ import {
 } from "@/stores/scanner";
 import { BlinkAction } from "../miner-actions/blink";
 import { ChangePoolsAction } from "../miner-actions/change-pools";
-import { NukeAction } from "../miner-actions/nuke";
+import { SleepAction } from "../miner-actions/sleep";
+import { WakeAction } from "../miner-actions/wake";
 import { ScanTableColumns } from "./columns";
 
 export default function ScanTable() {
@@ -118,7 +98,7 @@ export default function ScanTable() {
           <CardDescription>t0rch is in beta, launching 2024.</CardDescription>
         </div>
         <div className="flex justify-end pb-5">
-          <Button style={{ backgroundColor: "#e94d1b" }} className="mr-4">
+          {/* <Button style={{ backgroundColor: "#e94d1b" }} className="mr-4">
             Reboot All
           </Button>
           <Button
@@ -129,13 +109,6 @@ export default function ScanTable() {
             Config All
           </Button>
 
-          <Button
-            variant={"outline"}
-            style={{ borderColor: "#D22B2B" }}
-            className="mr-4"
-          >
-            Sleep Miner
-          </Button>
           <Dialog>
             <DialogTrigger>
               <Button
@@ -194,10 +167,19 @@ export default function ScanTable() {
                 <Button className="mx-auto">Update</Button>
               </DialogFooter>
             </DialogContent>
-          </Dialog>
-          {Object.keys(selectedIps).length > 0 && (
+          </Dialog> */}
+          {(table.getIsSomeRowsSelected() || table.getIsAllRowsSelected()) && (
             <>
-              <NukeAction />
+              <SleepAction
+                miners={table
+                  .getSelectedRowModel()
+                  .flatRows.map((e) => e.original)}
+              />
+              <WakeAction
+                miners={table
+                  .getSelectedRowModel()
+                  .flatRows.map((e) => e.original)}
+              />
               <BlinkAction
                 miners={table
                   .getSelectedRowModel()

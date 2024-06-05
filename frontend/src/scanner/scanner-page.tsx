@@ -234,17 +234,22 @@ const Header = () => {
           <Sun style={{ color: "#e94d1b" }} />
         </h3>
         <div className="flex flex-col p-4 space-x-4 space-y-2">
-          <div className="flex flex-row justify-end">
-            <SelectIpBaseSheet />
-            <Button
-              variant="outline"
-              className="mr-4"
-              style={{ borderColor: "#e94d1b" }}
-              onClick={IS_IN_SITE ? startScan : testScan}
-            >
-              {progress == 0 ? "Scan Network" : "Stop Scanning"}
-            </Button>
-            <ModeToggle />
+          <div className="flex flex-col items-end">
+            <div className="flex flex-row justify-end">
+              <SelectIpBaseSheet />
+              <Button
+                variant="outline"
+                className="mr-4"
+                style={{ borderColor: "#e94d1b" }}
+                onClick={IS_IN_SITE ? startScan : testScan}
+              >
+                {progress == 0 ? "Scan Network" : "Stop Scanning"}
+              </Button>
+              <ModeToggle />
+            </div>
+            <p className="text-sm mt-2 mx-4">
+              Selected Bases: {selectedBases.value.length}
+            </p>
           </div>
         </div>
       </div>

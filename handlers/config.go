@@ -6,29 +6,23 @@ import (
 	"net"
 	"net/http"
 	"sync"
-	"time"
 
 	"github.com/LucasSMPL/t0rch/miners"
 	"github.com/icholy/digest"
 )
 
-type PoolConfig struct {
+type configHandlerBody struct {
+	IPs   []string `json:"ips"`
+	Mode  int      `json:"mode"`
 	Pools []struct {
 		URL  string `json:"url"`
 		User string `json:"user"`
 		Pass string `json:"pass"`
-	} `json:"pools"`
+	} `json:"pools,omitempty"`
 }
 
-func PoolsHandler(w http.ResponseWriter, r *http.Request) {
-	var request struct {
-		IPs   []string `json:"ips"`
-		Pools []struct {
-			URL  string `json:"url"`
-			User string `json:"user"`
-			Pass string `json:"pass"`
-		} `json:"pools"`
-	}
+func ConfigHandler(w http.ResponseWriter, r *http.Request) {
+	var request configHandlerBody
 	decoder := json.NewDecoder(r.Body)
 
 	if err := decoder.Decode(&request); err != nil {
@@ -38,11 +32,6 @@ func PoolsHandler(w http.ResponseWriter, r *http.Request) {
 
 	if len(request.IPs) == 0 {
 		http.Error(w, "No IPs Provided", http.StatusBadRequest)
-		return
-	}
-
-	if len(request.Pools) == 0 {
-		http.Error(w, "No Pools Provided", http.StatusBadRequest)
 		return
 	}
 
@@ -62,7 +51,7 @@ func PoolsHandler(w http.ResponseWriter, r *http.Request) {
 			Username: "root",
 			Password: "root",
 		},
-		Timeout: time.Second * 5,
+		// Timeout: time.Second * 20,
 	}
 
 	resCh := make(chan string)
@@ -78,7 +67,14 @@ func PoolsHandler(w http.ResponseWriter, r *http.Request) {
 			go func(ip net.IP) {
 				defer wg.Done()
 				defer func() { <-semaphore }()
-				err := miners.Pools(client, ip, request.Pools)
+				err := miners.SetMinerConf(
+					client,
+					ip,
+					miners.IpConfPayload{
+						MinerMode: request.Mode,
+						Pools:     request.Pools,
+					},
+				)
 				if err != nil {
 					resCh <- "error"
 					return

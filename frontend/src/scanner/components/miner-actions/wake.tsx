@@ -7,27 +7,28 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { ScannedIp } from "@/lib/types";
-import { AlertDialogTrigger } from "@radix-ui/react-alert-dialog";
 import axios from "axios";
+import { ZapOff } from "lucide-react";
 import { useMutation } from "react-query";
 
-export const RebootAction = ({ miners }: { miners: ScannedIp[] }) => {
+export const WakeAction = ({ miners }: { miners: ScannedIp[] }) => {
   const { toast } = useToast();
-  const reboot = useMutation(
+  const wake = useMutation(
     async () => {
-      await axios.post(
-        "http://localhost:7070/reboot",
-        miners.map((x) => x.ip)
-      );
+      await axios.post("http://localhost:7070/config", {
+        ips: miners.map((x) => x.ip),
+        mode: 0,
+      });
     },
     {
       onSuccess: () => {
         toast({
-          title: "Reboot commands sent successfully",
+          title: "Wake commands sent successfully",
           variant: "success",
         });
       },
@@ -40,31 +41,32 @@ export const RebootAction = ({ miners }: { miners: ScannedIp[] }) => {
       },
     }
   );
-
   return (
     <AlertDialog>
       <AlertDialogTrigger>
         <Button
-          variant={"outline"}
-          className="mr-4"
-          isLoading={reboot.isLoading}
+          variant="outline"
+          style={{ borderColor: "#49de80", marginRight: "25px" }}
         >
-          Reboot {miners.length > 1 ? "Miners" : "Miner"}
+          Wake <ZapOff className="ml-4" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
+            This action cannot be undone. This will send curtailment commands to
+            all Antminers On Scan.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={() => reboot.mutate()}>
+          <AlertDialogAction onClick={() => wake.mutate()}>
             Continue
           </AlertDialogAction>
+          {/* <AlertDialogAction style={{ backgroundColor: "#5D3FD3" }}>
+              Schedule
+            </AlertDialogAction> */}
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
