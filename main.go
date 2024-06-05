@@ -65,9 +65,10 @@ func main() {
 	router.HandleFunc("POST /wake", handlers.WakeHandler)     // Wake Up Antminer
 
 	// miner info
-	router.HandleFunc("GET /chart/{ip}/", handlers.ChartHandler)     // Hashrate Chart Antminer
-	router.HandleFunc("GET /logs/{ip}/", handlers.LogsHandler)       // Show Log Antminer
-	router.HandleFunc("GET /network/{ip}/", handlers.NetworkHandler) // Get Network Info Antminer
+	router.HandleFunc("GET /chart/{ip}/", handlers.ChartHandler)           // Hashrate Chart Antminer
+	router.HandleFunc("GET /logs/{ip}/", handlers.LogsHandler)             // Show Log Antminer
+	router.HandleFunc("GET /network/{ip}/", handlers.NetworkHandler)       // Get Network Info Antminer
+	router.HandleFunc("GET /hashboards/{ip}/", handlers.HashboardsHandler) // Get Hashboard Info Antminer
 
 	// works in progress
 	router.HandleFunc("POST /tcp", tcpHandler) // Find Whatsminer

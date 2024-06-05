@@ -10,6 +10,8 @@ import { ChangePoolsAction } from "../miner-actions/change-pools";
 import { RebootAction } from "../miner-actions/reboot";
 import { HashrateChart } from "./components/hashrate-chart";
 import { NetworkDialog } from "./components/network-dialog";
+import AntminerHashboardView from "./components/antminer-hashboards";
+
 
 export const MinerDetailsSheet = ({ miner }: { miner: ScannedIp }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -80,7 +82,7 @@ export const MinerDetailsSheet = ({ miner }: { miner: ScannedIp }) => {
               </li>
             </ul>
             <RebootAction miners={[miner]} />
-            <Button variant={"outline"}>View Hashboards</Button>
+            <AntminerHashboardView miner={miner} />
             <ChangePoolsAction miners={[miner]} />
             <NetworkDialog miner={miner} />
             <Button variant={"outline"}>Read Logs</Button>

@@ -46,3 +46,18 @@ export type NetworkInfo  = {
 	conf_dnsservers: string
 }
 
+export type Chain = {
+  index: number;
+  freq_avg: number;
+  rate_ideal: number;
+  rate_real: number;
+  asic_num: number;
+  asic: string;
+  temp_pic: number[];
+  temp_pcb: number[];
+  temp_chip: number[];
+  hw: number;
+  eeprom_loaded: boolean;
+  sn: string;
+  hwp: number;
+}

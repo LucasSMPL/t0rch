@@ -54,7 +54,6 @@ import {
   useScannedIps,
   useSelectedIps,
 } from "@/stores/scanner";
-import AntminerHashboardView from "../antminer-hashboards";
 import { BlinkAction } from "../miner-actions/blink";
 import { ChangePoolsAction } from "../miner-actions/change-pools";
 import { NukeAction } from "../miner-actions/nuke";
@@ -119,7 +118,6 @@ export default function ScanTable() {
           <CardDescription>t0rch is in beta, launching 2024.</CardDescription>
         </div>
         <div className="flex justify-end pb-5">
-          <AntminerHashboardView />
           <Button style={{ backgroundColor: "#e94d1b" }} className="mr-4">
             Reboot All
           </Button>
