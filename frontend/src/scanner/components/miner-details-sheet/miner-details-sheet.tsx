@@ -11,6 +11,7 @@ import { RebootAction } from "../miner-actions/reboot";
 import { HashrateChart } from "./components/hashrate-chart";
 import { NetworkDialog } from "./components/network-dialog";
 import AntminerHashboardView from "./components/antminer-hashboards";
+import { ScanSearch } from "lucide-react";
 
 
 export const MinerDetailsSheet = ({ miner }: { miner: ScannedIp }) => {
@@ -21,7 +22,7 @@ export const MinerDetailsSheet = ({ miner }: { miner: ScannedIp }) => {
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
       <Button asChild variant={"outline"} className="mr-4">
-        <SheetTrigger>Details</SheetTrigger>
+        <SheetTrigger>Details <ScanSearch className="pl-3 w-8 h-8"/></SheetTrigger>
       </Button>
       <SheetContent className="max-w-[800px] sm:max-w-[540px] overflow-scroll">
         <CardContent className="p-6 text-sm">
