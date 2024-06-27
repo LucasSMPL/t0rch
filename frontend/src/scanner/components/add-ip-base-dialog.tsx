@@ -11,17 +11,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { CustomBase } from "@/lib/types";
+import { useLocalStorage } from "@uidotdev/usehooks";
 
-import { ChangeEvent, Dispatch, SetStateAction, useRef, useState } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 
-export const AddIpBaseDialog = ({
-  customBases,
-}: {
-  customBases: {
-    value: CustomBase[];
-    setValue: Dispatch<SetStateAction<CustomBase[]>>;
-  };
-}) => {
+export const AddIpBaseDialog = () => {
+  const [customBases, setCustomBases] = useLocalStorage<CustomBase[]>(
+    "custom-ip-bases",
+    []
+  );
   const { toast } = useToast();
 
   const nameRef = useRef<HTMLInputElement | null>(null);
@@ -89,7 +87,7 @@ export const AddIpBaseDialog = ({
                 name: nameRef.current!.value!,
                 base: baseRef.current!.value!,
               };
-              const hasDuplicate = customBases.value.find(
+              const hasDuplicate = customBases.find(
                 (cR) => cR.name === newRange.name || cR.base === newRange.base
               );
               if (hasDuplicate) {
@@ -98,7 +96,7 @@ export const AddIpBaseDialog = ({
                   variant: "destructive",
                 });
               }
-              customBases.setValue((prev) => [...prev, newRange]);
+              setCustomBases((prev) => [...prev, newRange]);
               setOpen(false);
               toast({
                 title: "Custom Base Added Successfully!",

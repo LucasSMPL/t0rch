@@ -61,11 +61,27 @@ func ScanHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resCh := make(chan utils.ScannedIp)
+	defer close(resCh)
 	ctx := r.Context()
 
 	go func() {
-		scanAllIps(client, ips, resCh, *models)
-		close(resCh)
+		wg := sync.WaitGroup{}
+		concurrencyLimit := 5000
+		semaphore := make(chan struct{}, concurrencyLimit)
+
+		for _, ip := range ips {
+			wg.Add(1)
+			semaphore <- struct{}{}
+			go func(ip net.IP) {
+				defer wg.Done()
+				defer func() { <-semaphore }()
+				scanRes := getMinerData(client, ip, *models)
+				resCh <- scanRes
+			}(ip)
+		}
+
+		wg.Wait()
+		close(semaphore)
 	}()
 
 	// Set headers for SSE
@@ -99,27 +115,6 @@ func ScanHandler(w http.ResponseWriter, r *http.Request) {
 			flusher.Flush()
 		}
 	}
-}
-
-func scanAllIps(client *http.Client, ips []net.IP, resCh chan<- utils.ScannedIp, models []utils.MinerModel) {
-
-	wg := sync.WaitGroup{}
-	concurrencyLimit := 200
-	semaphore := make(chan struct{}, concurrencyLimit)
-
-	for _, ip := range ips {
-		wg.Add(1)
-		semaphore <- struct{}{}
-		go func(ip net.IP) {
-			defer wg.Done()
-			defer func() { <-semaphore }()
-			scanRes := getMinerData(client, ip, models)
-			resCh <- scanRes
-		}(ip)
-	}
-
-	wg.Wait()
-	close(semaphore)
 }
 
 func getMinerData(

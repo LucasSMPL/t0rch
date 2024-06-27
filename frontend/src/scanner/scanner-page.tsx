@@ -1,18 +1,23 @@
 import { ModeToggle } from "@/components/mode-toggle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowBigDownDash, Flame, HelpCircle, Radar, Sun } from "lucide-react";
-
-import useLocalStorage from "@/hooks/use-local-storage";
+import { ScannedIp } from "@/lib/types";
 import {
   useScanFilters,
   useScannedIps,
   useSelectedIps,
 } from "@/stores/scanner";
-import { LucideIcon } from "lucide-react";
+import { useLocalStorage } from "@uidotdev/usehooks";
+import {
+  ArrowBigDownDash,
+  Flame,
+  HelpCircle,
+  LucideIcon,
+  Radar,
+  Sun,
+} from "lucide-react";
 import { useRef, useState } from "react";
 import LoadingBar from "react-top-loading-bar";
-import { ScannedIp } from "../lib/types";
 import ScanTable from "./components/scan-table/table";
 import { SelectIpBaseSheet } from "./components/select-ip-base-sheet";
 
@@ -148,7 +153,7 @@ const IS_IN_SITE = true;
 
 const Header = () => {
   const abortControllerRef = useRef<AbortController | null>(null);
-  const selectedBases = useLocalStorage<string[]>("selected-ip-bases", []);
+  const [selectedBases] = useLocalStorage<string[]>("selected-ip-bases", []);
 
   const { progress, resetProgress, setScannedIps, reset } = useScannedIps();
 
@@ -166,22 +171,33 @@ const Header = () => {
       headers: {
         "Content-Type": "text/event-stream",
       },
-      body: JSON.stringify(selectedBases.value),
+      body: JSON.stringify(selectedBases),
     });
     const reader = response.body
       ?.pipeThrough(new TextDecoderStream())
       .getReader();
     if (!reader) return;
     let isDone = false;
-
+    let buffer = "";
     while (!isDone) {
       const res = await reader.read();
       if (res.done) {
         isDone = true;
         break;
       }
-      const parsed: ScannedIp[] = res.value
-        .split("\n\n")
+      let r = res.value;
+      if (buffer) {
+        r = buffer + res.value;
+        buffer = "";
+      }
+      let parts = r.split("\n\n");
+      const last = parts.at(-1);
+      if (last) {
+        buffer += last;
+        parts = parts.slice(0, -1);
+      }
+      console.log(parts);
+      const parsed: ScannedIp[] = parts
         .filter((x) => x)
         .map((x) => JSON.parse(x));
       setScannedIps(parsed);
@@ -189,7 +205,7 @@ const Header = () => {
   };
   const testScan = async () => {
     reset();
-    for (const ipBase of selectedBases.value) {
+    for (const ipBase of selectedBases) {
       for (let i = 1; i < 256; i++) {
         const ip = `${ipBase}.${i}`;
         console.log(ip);
@@ -218,12 +234,15 @@ const Header = () => {
       }
     }
   };
+
+  console.log(progress);
+
   return (
     <>
       {progress != 0 && (
         <LoadingBar
           color="#ffffff"
-          progress={(progress / (selectedBases.value.length * 255)) * 100}
+          progress={(progress / (selectedBases.length * 255)) * 100}
           height={5}
           onLoaderFinished={() => resetProgress()}
         />
@@ -247,9 +266,12 @@ const Header = () => {
               </Button>
               <ModeToggle />
             </div>
-            <p className="text-sm mt-2 mx-4">
-              Selected Bases: {selectedBases.value.length}
-            </p>
+            {!!selectedBases.length && (
+              <p className="text-sm mt-2 mx-4">
+                Selected Bases: {selectedBases.length} (
+                {selectedBases.length * 255} IPs)
+              </p>
+            )}
           </div>
         </div>
       </div>

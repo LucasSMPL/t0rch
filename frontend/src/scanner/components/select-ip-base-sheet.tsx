@@ -13,21 +13,25 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import useLocalStorage from "@/hooks/use-local-storage";
 import { CustomBase } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { CheckedState } from "@radix-ui/react-checkbox";
+import { useLocalStorage } from "@uidotdev/usehooks";
 import { ChevronsUpDown } from "lucide-react";
 import { AddIpBaseDialog } from "./add-ip-base-dialog";
 
 export const SelectIpBaseSheet = () => {
-  const customBases = useLocalStorage<CustomBase[]>("custom-ip-bases", []);
-  const selectedBases = useLocalStorage<string[]>("selected-ip-bases", []);
+  const [customBases] = useLocalStorage<CustomBase[]>("custom-ip-bases", []);
+  const [selectedBases, setSelectedBases] = useLocalStorage<string[]>(
+    "selected-ip-bases",
+    []
+  );
 
   const allSelected = (bases: string[]): boolean => {
-    if (!selectedBases.value.length) return false;
+    if (!selectedBases.length) return false;
+    if (!bases.length) return false;
     for (const r of bases) {
-      const isSelected = selectedBases.value.find((e) => e === r);
+      const isSelected = selectedBases.find((e) => e === r);
       if (!isSelected) {
         return false;
       }
@@ -36,7 +40,7 @@ export const SelectIpBaseSheet = () => {
   };
 
   const toggleAll = (isChecked: CheckedState, bases: string[]): void => {
-    selectedBases.setValue((prev) => [
+    setSelectedBases((prev) => [
       ...prev.filter((r) => !bases.find((e) => e === r)),
       ...(isChecked ? bases : []),
     ]);
@@ -52,23 +56,23 @@ export const SelectIpBaseSheet = () => {
             <SheetTitle>IP Ranges</SheetTitle>
             <SheetDescription>These are your IP ranges.</SheetDescription>
           </div>
-          <AddIpBaseDialog customBases={customBases} />
+          <AddIpBaseDialog />
         </SheetHeader>
         <Collapsible className="min-w-[350px] space-y-2">
           <div className="flex items-center justify-between space-x-4 px-4">
             <div className="flex flex-row items-center">
               <Checkbox
                 className="mx-2"
-                checked={allSelected(customBases.value.map((e) => e.base))}
+                checked={allSelected(customBases.map((e) => e.base))}
                 onCheckedChange={(c) =>
                   toggleAll(
                     c,
-                    customBases.value.map((e) => e.base)
+                    customBases.map((e) => e.base)
                   )
                 }
               />
               <h4 className="text-sm font-semibold">
-                Custom ({customBases.value.length})
+                Custom ({customBases.length})
               </h4>
             </div>
             <CollapsibleTrigger asChild>
@@ -79,25 +83,21 @@ export const SelectIpBaseSheet = () => {
             </CollapsibleTrigger>
           </div>
           <CollapsibleContent className="space-y-2">
-            {customBases.value.map((e, i) => (
+            {customBases.map((e, i) => (
               <div
                 key={i}
                 className={cn(
                   "rounded-md border px-4 py-3 font-mono text-sm",
-                  selectedBases.value.find((r) => e.base === r)
-                    ? "bg-green-400"
-                    : ""
+                  selectedBases.find((r) => e.base === r) ? "bg-green-400" : ""
                 )}
                 onClick={() => {
-                  const hasRange = selectedBases.value.find(
-                    (r) => e.base === r
-                  );
+                  const hasRange = selectedBases.find((r) => e.base === r);
                   if (hasRange) {
-                    selectedBases.setValue((prev) => [
+                    setSelectedBases((prev) => [
                       ...prev.filter((r) => e.base !== r),
                     ]);
                   } else {
-                    selectedBases.setValue((prev) => [...prev, e.base]);
+                    setSelectedBases((prev) => [...prev, e.base]);
                   }
                 }}
               >
@@ -130,18 +130,16 @@ export const SelectIpBaseSheet = () => {
                   key={b}
                   className={cn(
                     "rounded-md border px-4 py-3 font-mono text-sm",
-                    selectedBases.value.find((r) => b === r)
-                      ? "bg-green-400"
-                      : ""
+                    selectedBases.find((r) => b === r) ? "bg-green-400" : ""
                   )}
                   onClick={() => {
-                    const hasRange = selectedBases.value.find((r) => b === r);
+                    const hasRange = selectedBases.find((r) => b === r);
                     if (hasRange) {
-                      selectedBases.setValue((prev) => [
+                      setSelectedBases((prev) => [
                         ...prev.filter((r) => b !== r),
                       ]);
                     } else {
-                      selectedBases.setValue((prev) => [...prev, b]);
+                      setSelectedBases((prev) => [...prev, b]);
                     }
                   }}
                 >

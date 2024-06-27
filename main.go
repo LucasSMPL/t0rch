@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/LucasSMPL/t0rch/handlers"
 	"github.com/LucasSMPL/t0rch/utils"
@@ -72,7 +73,7 @@ func main() {
 
 	server := http.Server{
 		Addr:    ":7070",
-		Handler: router,
+		Handler: timerMiddleware(router),
 	}
 
 	// log.Printf("Version: %s\n", version)
@@ -88,6 +89,14 @@ func main() {
 	open.Start("http://localhost:7070")
 	wg.Wait()
 
+}
+
+func timerMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		next.ServeHTTP(w, r)
+		log.Printf("%s %s %s %s", r.Method, r.RequestURI, r.Proto, time.Since(start))
+	})
 }
 
 func tcpHandler(w http.ResponseWriter, r *http.Request) {
