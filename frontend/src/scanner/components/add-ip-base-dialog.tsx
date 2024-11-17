@@ -60,7 +60,7 @@ export const AddIpBaseDialog = () => {
                 ].filter(Boolean);
                 input.value = chunks.join(".");
                 // Allow for 1-3 digits in the third octet
-                if (value.length >= 6) {
+                if (value.length >= 7) {
                   input.value = input.value.slice(0, 7); // Limit to maximum of XX.X.XXX
                 }
               }}

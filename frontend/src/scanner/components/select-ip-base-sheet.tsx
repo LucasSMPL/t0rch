@@ -21,12 +21,12 @@ import { ChevronsUpDown } from "lucide-react";
 import { AddIpBaseDialog } from "./add-ip-base-dialog";
 
 export const SelectIpBaseSheet = () => {
-  const customBases = useLocalStorage<CustomBase[]>("custom-ip-bases", []);
-  const selectedBases = useLocalStorage<string[]>("selected-ip-bases", []);
+  const [customBases] = useLocalStorage<CustomBase[]>("custom-ip-bases", []);
+  const [selectedBases, setSelectedBases] = useLocalStorage<string[]>("selected-ip-bases", []);
 
   const handleBaseSelection = (base: string) => {
     try {
-      selectedBases.setValue((prev) => {
+      setSelectedBases((prev) => {
         const currentBases = Array.isArray(prev) ? prev : [];
         const hasRange = currentBases.includes(base);
         return hasRange 
@@ -39,12 +39,12 @@ export const SelectIpBaseSheet = () => {
   };
 
   const allSelected = (bases: string[]): boolean => {
-    if (!bases.length || !selectedBases.value?.length) return false;
-    return bases.every(base => selectedBases.value.includes(base));
+    if (!bases.length || !selectedBases?.length) return false;
+    return bases.every(base => selectedBases.includes(base));
   };
 
   const toggleAll = (isChecked: CheckedState, bases: string[]): void => {
-    selectedBases.setValue((prev) => {
+    setSelectedBases((prev) => {
       const currentBases = Array.isArray(prev) ? prev : [];
       const filteredBases = currentBases.filter(r => !bases.includes(r));
       return isChecked ? [...filteredBases, ...bases] : filteredBases;
@@ -52,8 +52,8 @@ export const SelectIpBaseSheet = () => {
   };
 
   // Find orphaned bases
-  const orphanedBases = selectedBases.value?.filter(base => 
-    !customBases.value.some(cb => cb.base === base) && 
+  const orphanedBases = selectedBases?.filter(base => 
+    !customBases.some(cb => cb.base === base) && 
     !predefinedBases.some(pb => pb.bases.includes(base))
   );
 
@@ -93,7 +93,7 @@ export const SelectIpBaseSheet = () => {
                   key={base}
                   className={cn(
                     "rounded-md border px-4 py-3 font-mono text-sm",
-                    selectedBases.value?.includes(base) ? "bg-green-400" : ""
+                    selectedBases?.includes(base) ? "bg-green-400" : ""
                   )}
                   onClick={() => handleBaseSelection(base)}
                 >
@@ -135,7 +135,7 @@ export const SelectIpBaseSheet = () => {
                 key={i}
                 className={cn(
                   "rounded-md border px-4 py-3 font-mono text-sm",
-                  selectedBases.value?.includes(e.base) ? "bg-green-400" : ""
+                  selectedBases?.includes(e.base) ? "bg-green-400" : ""
                 )}
                 onClick={() => handleBaseSelection(e.base)}
               >
@@ -170,7 +170,7 @@ export const SelectIpBaseSheet = () => {
                   key={b}
                   className={cn(
                     "rounded-md border px-4 py-3 font-mono text-sm",
-                    selectedBases.value?.includes(b) ? "bg-green-400" : ""
+                    selectedBases?.includes(b) ? "bg-green-400" : ""
                   )}
                   onClick={() => handleBaseSelection(b)}
                 >

@@ -55,8 +55,9 @@ import {
 } from "@/stores/scanner";
 import { BlinkAction } from "../miner-actions/blink";
 // import { ChangePoolsAction } from "../miner-actions/change-pools";
-import { NukeAction } from "../miner-actions/nuke";
+// import { NukeAction } from "../miner-actions/nuke";
 import { ScanTableColumns } from "./columns";
+import { Button } from "@/components/ui/button";
 
 export default function ScanTable() {
   const { scannedIps } = useScannedIps();
@@ -199,7 +200,7 @@ export default function ScanTable() {
                   .getSelectedRowModel()
                   .flatRows.map((e) => e.original)}
               />
-              <NukeAction />
+              {/* <NukeAction /> */}
               <BlinkAction
                 miners={table
                   .getSelectedRowModel()
