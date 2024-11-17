@@ -100,7 +100,7 @@ func ScanHandler(w http.ResponseWriter, r *http.Request) {
 	for {
 		select {
 		case <-ctx.Done():
-			log.Println("Scan aborted by the client")
+			log.Println("\033[31mScan aborted by the client\033[0m")
 			return
 		case r, ok := <-resCh:
 			if !ok {
@@ -203,18 +203,54 @@ func getMinerData(
 		controller = c
 	}
 
-	psuFailingKeywords := []string{"power voltage can not meet the target", "ERROR_POWER_LOST", "stop_mining: get power type version failed!"}
-	if isUnderhashing {
-		p := ContainsAny(*ipLogs, psuFailingKeywords)
-		if p != "" {
-			psuFailure = true
-		}
+	psuFailingKeywords := []string{"power voltage can not meet the target", "ERROR_POWER_LOST: get power type version failed!", "stop_mining: get power type version failed!", "bitmain_get_power_status failed!"}
+	p := ContainsAny(*ipLogs, psuFailingKeywords)
+	if p != "" {
+		psuFailure = true
 	}
 
-	powerRgx := regexp.MustCompile("power type version: (0x0-9[a-fA-F]+)")
+	powerRgx := regexp.MustCompile(`power type version: (0x[0-9a-fA-F]+)`)
 	searchRes := strings.Split(powerRgx.FindString(*ipLogs), " ")
 	if len(searchRes) >= 4 {
-		powerType = searchRes[3]
+		hexValue := searchRes[3]
+		switch hexValue {
+		case "0x71":
+			powerType = "APW121215a"
+		case "0x0071":
+			powerType = "APW121215b"
+		case "0x72":
+			powerType = "APW121215b"
+		case "0x0072":
+			powerType = "APW121215b"
+		case "0x73":
+			powerType = "APW121417a"
+		case "0x0073":
+			powerType = "APW121417a"
+		case "0x0074":
+			powerType = "APW121215c"
+		case "0x75":
+			powerType = "APW121215e"
+		case "0x0075":
+			powerType = "APW121215e"
+		case "0x76":
+			powerType = "APW121215f"
+		case "0x0076":
+			powerType = "APW121215f"
+		case "0x77":
+			powerType = "APW121215d"
+		case "0x0077":
+			powerType = "APW121215d"
+		case "0x78":
+			powerType = "APW121417b"
+		case "0x0078":
+			powerType = "APW121417b"
+		case "0xc1":
+			powerType = "APW171215a"
+		case "0x00c1":
+			powerType = "APW171215a"
+		default:
+			powerType = hexValue
+		}
 	}
 
 	hbModelRgx := regexp.MustCompile("load machine (.*?) conf")

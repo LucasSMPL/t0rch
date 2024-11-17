@@ -21,30 +21,42 @@ import { ChevronsUpDown } from "lucide-react";
 import { AddIpBaseDialog } from "./add-ip-base-dialog";
 
 export const SelectIpBaseSheet = () => {
-  const [customBases] = useLocalStorage<CustomBase[]>("custom-ip-bases", []);
-  const [selectedBases, setSelectedBases] = useLocalStorage<string[]>(
-    "selected-ip-bases",
-    []
-  );
+  const customBases = useLocalStorage<CustomBase[]>("custom-ip-bases", []);
+  const selectedBases = useLocalStorage<string[]>("selected-ip-bases", []);
+
+  const handleBaseSelection = (base: string) => {
+    try {
+      selectedBases.setValue((prev) => {
+        const currentBases = Array.isArray(prev) ? prev : [];
+        const hasRange = currentBases.includes(base);
+        return hasRange 
+          ? currentBases.filter(r => r !== base)
+          : [...currentBases, base];
+      });
+    } catch (error) {
+      console.error('Error selecting base:', base, error);
+    }
+  };
 
   const allSelected = (bases: string[]): boolean => {
-    if (!selectedBases.length) return false;
-    if (!bases.length) return false;
-    for (const r of bases) {
-      const isSelected = selectedBases.find((e) => e === r);
-      if (!isSelected) {
-        return false;
-      }
-    }
-    return true;
+    if (!bases.length || !selectedBases.value?.length) return false;
+    return bases.every(base => selectedBases.value.includes(base));
   };
 
   const toggleAll = (isChecked: CheckedState, bases: string[]): void => {
-    setSelectedBases((prev) => [
-      ...prev.filter((r) => !bases.find((e) => e === r)),
-      ...(isChecked ? bases : []),
-    ]);
+    selectedBases.setValue((prev) => {
+      const currentBases = Array.isArray(prev) ? prev : [];
+      const filteredBases = currentBases.filter(r => !bases.includes(r));
+      return isChecked ? [...filteredBases, ...bases] : filteredBases;
+    });
   };
+
+  // Find orphaned bases
+  const orphanedBases = selectedBases.value?.filter(base => 
+    !customBases.value.some(cb => cb.base === base) && 
+    !predefinedBases.some(pb => pb.bases.includes(base))
+  );
+
   return (
     <Sheet>
       <Button style={{ marginRight: "25px" }} asChild variant={"outline"}>
@@ -58,6 +70,41 @@ export const SelectIpBaseSheet = () => {
           </div>
           <AddIpBaseDialog />
         </SheetHeader>
+
+        {/* Orphaned Bases Section */}
+        {orphanedBases?.length > 0 && (
+          <Collapsible className="min-w-[350px] space-y-2">
+            <div className="flex items-center justify-between space-x-4 px-4">
+              <div className="flex flex-row items-center">
+                <h4 className="text-sm font-semibold text-yellow-600">
+                  Previously Selected Ranges ({orphanedBases.length})
+                </h4>
+              </div>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="w-9 p-0">
+                  <ChevronsUpDown className="h-4 w-4" />
+                  <span className="sr-only">Show</span>
+                </Button>
+              </CollapsibleTrigger>
+            </div>
+            <CollapsibleContent className="space-y-2">
+              {orphanedBases.map(base => (
+                <div
+                  key={base}
+                  className={cn(
+                    "rounded-md border px-4 py-3 font-mono text-sm",
+                    selectedBases.value?.includes(base) ? "bg-green-400" : ""
+                  )}
+                  onClick={() => handleBaseSelection(base)}
+                >
+                  {base}
+                </div>
+              ))}
+            </CollapsibleContent>
+          </Collapsible>
+        )}
+
+        {/* Custom Bases Section */}
         <Collapsible className="min-w-[350px] space-y-2">
           <div className="flex items-center justify-between space-x-4 px-4">
             <div className="flex flex-row items-center">
@@ -88,24 +135,17 @@ export const SelectIpBaseSheet = () => {
                 key={i}
                 className={cn(
                   "rounded-md border px-4 py-3 font-mono text-sm",
-                  selectedBases.find((r) => e.base === r) ? "bg-green-400" : ""
+                  selectedBases.value?.includes(e.base) ? "bg-green-400" : ""
                 )}
-                onClick={() => {
-                  const hasRange = selectedBases.find((r) => e.base === r);
-                  if (hasRange) {
-                    setSelectedBases((prev) => [
-                      ...prev.filter((r) => e.base !== r),
-                    ]);
-                  } else {
-                    setSelectedBases((prev) => [...prev, e.base]);
-                  }
-                }}
+                onClick={() => handleBaseSelection(e.base)}
               >
                 {e.name}: {e.base}
               </div>
             ))}
           </CollapsibleContent>
         </Collapsible>
+
+        {/* Predefined Bases Section */}
         {predefinedBases.map((e) => (
           <Collapsible className="min-w-[350px] space-y-2" key={e.name}>
             <div className="flex items-center justify-between space-x-4 px-4">
@@ -130,18 +170,9 @@ export const SelectIpBaseSheet = () => {
                   key={b}
                   className={cn(
                     "rounded-md border px-4 py-3 font-mono text-sm",
-                    selectedBases.find((r) => b === r) ? "bg-green-400" : ""
+                    selectedBases.value?.includes(b) ? "bg-green-400" : ""
                   )}
-                  onClick={() => {
-                    const hasRange = selectedBases.find((r) => b === r);
-                    if (hasRange) {
-                      setSelectedBases((prev) => [
-                        ...prev.filter((r) => b !== r),
-                      ]);
-                    } else {
-                      setSelectedBases((prev) => [...prev, b]);
-                    }
-                  }}
+                  onClick={() => handleBaseSelection(b)}
                 >
                   {b}
                 </div>
@@ -262,15 +293,108 @@ const predefinedBases = [
   {
     name: "Site 3",
     bases: [
-      "10.0.131",
-      "10.0.132",
-      "10.0.133",
-      "10.0.134",
-      "10.0.135",
-      "10.0.136",
-      "10.0.137",
-      "10.0.138",
-      "10.0.140",
+      "10.0.150",
+      "10.0.151",
+      "10.0.152",
+      "10.0.153",
+      "10.0.154",
+      "10.0.155",
+      "10.0.156",
+      "10.0.157",
+      "10.0.158",
+      "10.0.159",
+      "10.0.160",
+      "10.0.145",
+      "10.0.146",
+      "10.0.147",
+      "10.0.148",
+      "10.0.149",
+      "10.0.15",
+      "10.0.16",
+      "10.0.17",
+      "10.0.18",
+      "10.0.19",
+      "10.0.20",
+      "10.0.21",
+      "10.0.22",
+      "10.0.23",
     ],
   },
+  // {
+  //   name: "Site 5",
+  //   bases: [
+  //     "10.0.10",
+  //     "10.0.11",
+  //     "10.0.12",
+  //     "10.0.13",
+  //     "10.0.14",
+  //     "10.0.15",
+  //     "10.0.16",
+  //     "10.0.17",
+  //     "10.0.18",
+  //     "10.0.183",
+  //     "10.0.19",
+  //     "10.0.20",
+  //     "10.0.3",
+  //     "10.0.4",
+  //     "10.0.5",
+  //     "10.0.50",
+  //     "10.0.51",
+  //     "10.0.52",
+  //     "10.0.53",
+  //     "10.0.54",
+  //     "10.0.55",
+  //     "10.0.6",
+  //     "10.0.7",
+  //     "10.0.8",
+  //     "10.0.9",
+  //   ],
+  // },
+  // {
+  //   name: "Site 5 BTC",
+  //   bases: [
+  //     "10.0.150",
+  //     "10.0.151",
+  //     "10.0.152",
+  //     "10.0.153",
+  //     "10.0.154",
+  //     "10.0.155",
+  //     "10.0.156",
+  //     "10.0.157",
+  //     "10.0.158",
+  //     "10.0.159",
+  //     "10.0.160",
+  //     "10.0.145",
+  //     "10.0.146",
+  //     "10.0.147",
+  //     "10.0.148",
+  //     "10.0.149",
+  //     "10.0.15",
+  //     "10.0.16",
+  //     "10.0.17",
+  //     "10.0.18",
+  //     "10.0.19",
+  //     "10.0.20",
+  //     "10.0.21",
+  //     "10.0.22",
+  //     "10.0.23",
+  //   ],
+  // },
+  // {
+  //   name: "HQ",
+  //   bases: [
+  //     "10.0.45",
+  //     "10.0.46",
+  //     "10.0.47",
+  //     "10.0.48",
+  //     "10.0.49",
+  //     "10.0.50",
+  //     "10.0.51",
+  //     "10.0.52",
+  //     "10.0.53",
+  //     "10.0.54",
+  //     "10.0.55",
+  //   ],
+  // },
 ];
+

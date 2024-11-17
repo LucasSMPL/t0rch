@@ -67,6 +67,8 @@ func main() {
 	router.HandleFunc("GET /logs/{ip}/", handlers.LogsHandler)             // Show Log Antminer
 	router.HandleFunc("GET /network/{ip}/", handlers.NetworkHandler)       // Get Network Info Antminer
 	router.HandleFunc("GET /hashboards/{ip}/", handlers.HashboardsHandler) // Get Hashboard Info Antminer
+	router.HandleFunc("GET /config/{ip}/", handlers.ConfigHandler)         // Get Config Info Atminer
+	// router.HandleFunc("GET /current-pools", handlers.PoolsHandler)         // Get Current Pools Antminer
 
 	// works in progress
 	router.HandleFunc("POST /tcp", tcpHandler) // Find Whatsminer

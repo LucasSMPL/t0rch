@@ -27,6 +27,7 @@ func ConfigHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := decoder.Decode(&request); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		fmt.Println("Error decoding request:", err)
 		return
 	}
 
@@ -51,7 +52,10 @@ func ConfigHandler(w http.ResponseWriter, r *http.Request) {
 			Username: "root",
 			Password: "root",
 		},
+<<<<<<<< Updated upstream:handlers/config.go
 		// Timeout: time.Second * 20,
+========
+>>>>>>>> Stashed changes:handlers/pools.go
 	}
 
 	resCh := make(chan string)
@@ -67,6 +71,7 @@ func ConfigHandler(w http.ResponseWriter, r *http.Request) {
 			go func(ip net.IP) {
 				defer wg.Done()
 				defer func() { <-semaphore }()
+<<<<<<<< Updated upstream:handlers/config.go
 				err := miners.SetMinerConf(
 					client,
 					ip,
@@ -75,11 +80,16 @@ func ConfigHandler(w http.ResponseWriter, r *http.Request) {
 						Pools:     request.Pools,
 					},
 				)
+========
+				_, err := miners.Pools(client, ip, request.Pools)
+>>>>>>>> Stashed changes:handlers/pools.go
 				if err != nil {
+					fmt.Println("Error processing pools for IP:", ip, "Error:", err)
 					resCh <- "error"
 					return
 				}
 				resCh <- "success"
+				fmt.Println("successfully changed pools for IP:", ip)
 			}(ip)
 		}
 

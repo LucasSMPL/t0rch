@@ -48,7 +48,7 @@ export const SleepAction = ({ miners }: { miners: ScannedIp[] }) => {
           variant="outline"
           style={{ borderColor: "#49de80", marginRight: "25px" }}
         >
-          Sleep <ZapOff className="ml-4" />
+          NUKE (Soon) <ZapOff className="ml-4" />
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>

@@ -57,7 +57,7 @@ export const ScanTableColumns: ColumnDef<ScannedIp>[] = [
     header: ({ column }) => <ColumnHeader column={column} title="Type" />,
     cell: ({ row }) => {
       return (
-        <div className="flex items-center">
+        <div>
           <span>
             {row.original.miner_type} (
             {(row.original.rate_ideal / 1000).toFixed(0)} TH)
@@ -94,6 +94,8 @@ export const ScanTableColumns: ColumnDef<ScannedIp>[] = [
   //     );
   //   },
   // },
+
+  // Converting uptime (secondto minutes and seconds!
   {
     accessorKey: "uptime",
     header: ({ column }) => <ColumnHeader column={column} title="Uptime" />,
@@ -101,7 +103,7 @@ export const ScanTableColumns: ColumnDef<ScannedIp>[] = [
       return (
         <div className="flex space-x-2">
           <span className="truncate font-medium">
-            {row.original.uptime.toFixed(2)}
+        {Math.floor(row.original.uptime / 3600)}h {Math.floor((row.original.uptime % 3600) / 60)}m {Math.floor(row.original.uptime % 60)}s
           </span>
         </div>
       );

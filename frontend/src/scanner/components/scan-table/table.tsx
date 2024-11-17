@@ -27,16 +27,35 @@ import {
 import { flexRender } from "@tanstack/react-table";
 
 import { CardDescription } from "@/components/ui/card";
+import {
+  Dialog,
+  // DialogContent,
+  // DialogDescription,
+  // DialogFooter,
+  // DialogHeader,
+  // DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+// import { Input } from "@/components/ui/input";
+// import { Label } from "@/components/ui/label";
 
+// import {
+//   Select,
+//   SelectContent,
+//   SelectGroup,
+//   SelectItem,
+//   SelectLabel,
+//   SelectTrigger,
+//   SelectValue,
+// } from "@/components/ui/select";
 import {
   useScanFilters,
   useScannedIps,
   useSelectedIps,
 } from "@/stores/scanner";
 import { BlinkAction } from "../miner-actions/blink";
-import { ChangePoolsAction } from "../miner-actions/change-pools";
-import { SleepAction } from "../miner-actions/sleep";
-import { WakeAction } from "../miner-actions/wake";
+// import { ChangePoolsAction } from "../miner-actions/change-pools";
+import { NukeAction } from "../miner-actions/nuke";
 import { ScanTableColumns } from "./columns";
 
 export default function ScanTable() {
@@ -95,20 +114,23 @@ export default function ScanTable() {
       <CardHeader className="flex flex-row justify-between">
         <div className="flex flex-col justify-start items-baseline">
           <CardTitle>t0rch - btc tools but better</CardTitle>
-          <CardDescription>t0rch is in beta, launching 2024.</CardDescription>
+          <CardDescription>t0rch is in beta, launching 2025.</CardDescription>
         </div>
         <div className="flex justify-end pb-5">
-          {/* <Button style={{ backgroundColor: "#e94d1b" }} className="mr-4">
-            Reboot All
-          </Button>
           <Button
             variant={"outline"}
             style={{ borderColor: "#D22B2B" }}
             className="mr-4"
           >
-            Config All
+            Config All (Soon)
           </Button>
-
+          {/* <Button
+            variant={"outline"}
+            style={{ borderColor: "#D22B2B" }}
+            className="mr-4"
+          >
+            Sleep Miners (Soon)
+          </Button> */}
           <Dialog>
             <DialogTrigger>
               <Button
@@ -116,10 +138,10 @@ export default function ScanTable() {
                 style={{ borderColor: "#D22B2B" }}
                 className="mr-4"
               >
-                Firmware Upgrade
+                Firmware Upgrade (Soon)
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[450px]">
+            {/* <DialogContent className="sm:max-w-[450px]">
               <DialogHeader>
                 <DialogTitle>Upgrade Antminer Firmware</DialogTitle>
                 <DialogDescription>
@@ -166,35 +188,28 @@ export default function ScanTable() {
               <DialogFooter className="justify-center">
                 <Button className="mx-auto">Update</Button>
               </DialogFooter>
-            </DialogContent>
-          </Dialog> */}
-          {(table.getIsSomeRowsSelected() || table.getIsAllRowsSelected()) && (
+            </DialogContent> */}
+          </Dialog>
+          
+          {/* Buttons when Miner / Miners are selected. */}
+          {Object.keys(selectedIps).length > 0 && (
             <>
-              <SleepAction
+            <RebootAction
                 miners={table
                   .getSelectedRowModel()
                   .flatRows.map((e) => e.original)}
               />
-              <WakeAction
-                miners={table
-                  .getSelectedRowModel()
-                  .flatRows.map((e) => e.original)}
-              />
+              <NukeAction />
               <BlinkAction
                 miners={table
                   .getSelectedRowModel()
                   .flatRows.map((e) => e.original)}
               />
-              <ChangePoolsAction
-                miners={table
+              {/* <ChangePoolsAction
+                miner={table
                   .getSelectedRowModel()
                   .flatRows.map((e) => e.original)}
-              />
-              <RebootAction
-                miners={table
-                  .getSelectedRowModel()
-                  .flatRows.map((e) => e.original)}
-              />
+              /> */}
             </>
           )}
         </div>

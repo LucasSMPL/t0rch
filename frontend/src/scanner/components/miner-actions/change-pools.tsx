@@ -19,12 +19,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/components/ui/use-toast";
-import { ScannedIp } from "@/lib/types";
+import { Config, ScannedIp } from "@/lib/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useMutation, useQuery } from "react-query";
+import { useMutation,useQuery } from "react-query";
 import { z } from "zod";
 
 const ChangePoolsFormSchema = z.object({
@@ -39,7 +39,7 @@ const ChangePoolsFormSchema = z.object({
     .length(3),
 });
 
-export const ChangePoolsAction = ({ miners }: { miners: ScannedIp[] }) => {
+export const ChangePoolsAction = ({ miner }: { miner: ScannedIp }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { toast } = useToast();
 
@@ -51,23 +51,32 @@ export const ChangePoolsAction = ({ miners }: { miners: ScannedIp[] }) => {
   });
 
   useQuery(
-    ["pools"],
+    ["pools", miner.ip],
     async () => {
-      const response = await axios.get<
-        z.infer<typeof ChangePoolsFormSchema>["pools"]
-      >(`http://localhost:7070/pools/${miners.at(0)!.ip}`);
-
-      form.setValue("pools", response.data);
-      return response.data;
+      try {
+        const response = await axios.get<
+          Config
+        >(`http://localhost:7070/config/${miner.ip}`);
+        form.setValue("pools", response.data.pools);
+        console.log(response.data);
+        return response.data;
+      } catch (error) {
+        console.error("Error fetching current pools:", error);
+        toast({
+          title: "Error fetching current pools",
+          description: error instanceof Error ? error.message : "Unknown error",
+          variant: "destructive",
+        });
+      }
     },
     {
-      enabled: miners.length === 1 && isOpen,
+      enabled: isOpen,
     }
   );
 
   function onSubmit(values: z.infer<typeof ChangePoolsFormSchema>) {
     console.log(values);
-    changePools.mutate({ m: miners, pools: values.pools });
+    changePools.mutate({ m: miner, pools: values.pools });
   }
 
   const changePools = useMutation(
@@ -75,13 +84,18 @@ export const ChangePoolsAction = ({ miners }: { miners: ScannedIp[] }) => {
       m,
       pools,
     }: {
-      m: ScannedIp[];
+      m: ScannedIp;
       pools: z.infer<typeof ChangePoolsFormSchema>["pools"];
     }) => {
-      await axios.post("http://localhost:7070/change-pools", {
-        ips: m.map((x) => x.ip),
-        pools: pools,
-      });
+      try {
+        await axios.post("http://localhost:7070/pools", {
+          ips: [m.ip],
+          pools: pools,
+        });
+      } catch (error) {
+        console.error("Error changing pools:", error);
+        throw error; // Rethrow to trigger onError
+      }
     },
     {
       onSuccess: () => {
@@ -95,6 +109,7 @@ export const ChangePoolsAction = ({ miners }: { miners: ScannedIp[] }) => {
         console.log(e);
         toast({
           title: "Something went wrong!",
+          description: e instanceof Error ? e.message : "Unknown error",
           variant: "destructive",
         });
       },
@@ -107,7 +122,7 @@ export const ChangePoolsAction = ({ miners }: { miners: ScannedIp[] }) => {
         <Button
           variant={"outline"}
           style={{ borderColor: "#D22B2B" }}
-          className="mr-4"
+          className="w-full"
         >
           Change Pools
         </Button>
@@ -161,6 +176,7 @@ export const ChangePoolsAction = ({ miners }: { miners: ScannedIp[] }) => {
                             placeholder="Password"
                             type="password"
                             {...field}
+                            defaultValue={field.value}
                           />
                         </FormControl>
                         <FormMessage />

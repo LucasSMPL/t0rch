@@ -61,3 +61,25 @@ export type Chain = {
   sn: string;
   hwp: number;
 }
+
+
+export type Config = {
+    pools: {
+        url: string;
+        user: string;
+        pass: string;
+    }[];
+    "api-listen": boolean;
+    "api-network": boolean;
+    "api-groups": string;
+    "api-allow": string;
+    "bitmain-fan-ctrl": boolean;
+    "bitmain-fan-pwm": string;
+    "bitmain-use-vil": boolean;
+    "bitmain-freq": string;
+    "bitmain-voltage": string;
+    "bitmain-ccdelay": string;
+    "bitmain-pwth": string;
+    "bitmain-work-mode": string;
+    "bitmain-freq-level": string;
+}

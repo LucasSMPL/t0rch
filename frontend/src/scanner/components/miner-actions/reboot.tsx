@@ -27,7 +27,8 @@ export const RebootAction = ({ miners }: { miners: ScannedIp[] }) => {
     {
       onSuccess: () => {
         toast({
-          title: "Reboot commands sent successfully",
+          title: "Reboot Commands Sent Successfully",
+          description: "Please allow 15-30 seconds for the miners to reboot.",
           variant: "success",
         });
       },
@@ -45,8 +46,9 @@ export const RebootAction = ({ miners }: { miners: ScannedIp[] }) => {
     <AlertDialog>
       <AlertDialogTrigger>
         <Button
+          className="w-full mr-4"
+          style={{ borderColor: "#4ade80" }}
           variant={"outline"}
-          className="mr-4"
           isLoading={reboot.isLoading}
         >
           Reboot {miners.length > 1 ? "Miners" : "Miner"}
@@ -56,8 +58,7 @@ export const RebootAction = ({ miners }: { miners: ScannedIp[] }) => {
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
+            This action cannot be undone. This will reboot the selected miner(s).
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

@@ -37,7 +37,7 @@ export const NetworkDialog = ({ miner }: { miner: ScannedIp }) => {
         <Button
           variant={"outline"}
           style={{ borderColor: "#D22B2B" }}
-          className="mr-4"
+          className="w-full"
         >
           IP Settings
         </Button>

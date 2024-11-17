@@ -48,20 +48,21 @@ export const AddIpBaseDialog = () => {
             <Label htmlFor="address">IP Base</Label>
             <Input
               id="base"
-              placeholder="XX.X.XXX (10.0.169)"
+              placeholder="XX.X.XX or XX.X.XXX (e.g. 10.0.55 or 10.0.169)"
               ref={baseRef}
               onChange={(event: ChangeEvent<HTMLInputElement>) => {
                 const input = event.target;
                 const value = input.value.replace(/\D/g, ""); // Remove non-digit characters
-                input.value = (value.match(/.{1,3}/g) || []).join(".");
                 const chunks = [
                   value.slice(0, 2),
                   value.slice(2, 3),
                   value.slice(3),
-                ].filter(Boolean); // Filter out empty strings
+                ].filter(Boolean);
                 input.value = chunks.join(".");
-                if (value.length >= 7)
-                  return (input.value = input.value.slice(0, 8));
+                // Allow for 1-3 digits in the third octet
+                if (value.length >= 6) {
+                  input.value = input.value.slice(0, 7); // Limit to maximum of XX.X.XXX
+                }
               }}
             />
           </div>
@@ -79,7 +80,7 @@ export const AddIpBaseDialog = () => {
               }
               if (!isValidFormat(baseRef.current?.value ?? "")) {
                 return toast({
-                  title: "Invalid Base!",
+                  title: "Invalid Base! Format should be XX.X.XX or XX.X.XXX",
                   variant: "destructive",
                 });
               }
@@ -113,6 +114,6 @@ export const AddIpBaseDialog = () => {
 };
 
 function isValidFormat(input: string) {
-  const regex = /^\d{2}\.\d{1}\.\d{3}$/;
+  const regex = /^\d{2}\.\d{1}\.\d{1,3}$/;
   return regex.test(input);
 }

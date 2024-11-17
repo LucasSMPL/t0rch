@@ -23,7 +23,7 @@ import { SelectIpBaseSheet } from "./components/select-ip-base-sheet";
 
 export default function ScannerPage() {
   const [banner] = useState({
-    message: "There is a curtailment scheduled: Tuesday - 8:00pm to 9:15pm!",
+    message: "v4.0 by Lucas - No Updates Needed - No curtailments scheduled.",
     visible: true,
   });
 

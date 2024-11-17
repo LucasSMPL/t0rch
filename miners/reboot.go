@@ -15,15 +15,16 @@ func Reboot(
 
 	res, err := client.Post(fullURL, "application/json", nil)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("\033[31mError: ", err, "\033[0m")
 		return err
 	}
 	defer res.Body.Close()
 
 	if res.StatusCode >= 300 {
-		fmt.Printf("status: %d\n", res.StatusCode)
+		fmt.Printf("\033[31mStatus: %d\033[0m\n", res.StatusCode)
 		return fmt.Errorf("status: %d", res.StatusCode)
 	}
 
+	fmt.Println("\033[32mSuccess: Reboot Command Sent Successfully\033[0m")
 	return nil
 }

@@ -12,6 +12,7 @@ import { HashrateChart } from "./components/hashrate-chart";
 import { NetworkDialog } from "./components/network-dialog";
 import AntminerHashboardView from "./components/antminer-hashboards";
 import { ScanSearch } from "lucide-react";
+import ReadLogs from "./components/read-logs";
 
 
 export const MinerDetailsSheet = ({ miner }: { miner: ScannedIp }) => {
@@ -84,9 +85,9 @@ export const MinerDetailsSheet = ({ miner }: { miner: ScannedIp }) => {
             </ul>
             <RebootAction miners={[miner]} />
             <AntminerHashboardView miner={miner} />
-            <ChangePoolsAction miners={[miner]} />
+            <ChangePoolsAction miner={miner} />
             <NetworkDialog miner={miner} />
-            <Button variant={"outline"}>Read Logs</Button>
+            <ReadLogs miner={miner} />
             <FactoryResetButton miners={[miner]} />
           </div>
           {/* <Separator className="my-4" />

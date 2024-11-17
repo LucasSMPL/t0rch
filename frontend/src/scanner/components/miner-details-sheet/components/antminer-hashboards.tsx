@@ -42,7 +42,7 @@ const AntminerHashboardView = ({ miner }: { miner: ScannedIp }) => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger>
-        <Button variant={"outline"} style={{ borderColor: "#D22B2B" }} >View Hashboards</Button>
+        <Button variant={"outline"} style={{ borderColor: "#D22B2B" }} className="w-full">View Hashboards</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[1100px]">
         <DialogHeader>
