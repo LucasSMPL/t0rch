@@ -71,6 +71,8 @@ export const ChangePoolsAction = ({ miner }: { miner: ScannedIp }) => {
     },
     {
       enabled: isOpen,
+      refetchOnMount: false,
+      refetchOnReconnect: false,
     }
   );
 
@@ -101,7 +103,8 @@ export const ChangePoolsAction = ({ miner }: { miner: ScannedIp }) => {
       onSuccess: () => {
         form.reset();
         toast({
-          title: "Change Pool commands sent successfully",
+          title: "Change Pool Command Sent Successfully",
+          description: "Please allow 15-30 seconds for the miners to update.",
           variant: "success",
         });
       },

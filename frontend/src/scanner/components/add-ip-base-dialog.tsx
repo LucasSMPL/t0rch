@@ -15,6 +15,8 @@ import { useLocalStorage } from "@uidotdev/usehooks";
 
 import { ChangeEvent, useRef, useState } from "react";
 
+
+
 export const AddIpBaseDialog = () => {
   const [customBases, setCustomBases] = useLocalStorage<CustomBase[]>(
     "custom-ip-bases",

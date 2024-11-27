@@ -37,7 +37,7 @@ func ScanHandler(w http.ResponseWriter, r *http.Request) {
 			Username: "root",
 			Password: "root",
 		},
-		Timeout: time.Second * 5,
+		Timeout: time.Second * 15,
 	}
 
 	ips := []net.IP{}
