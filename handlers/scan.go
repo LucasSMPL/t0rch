@@ -197,7 +197,7 @@ func getMinerData(
 	hbType := "Unknown"
 	psuFailure := false
 
-	controllerKeywords := []string{"Xilinx", "amlogic", "BeagleBone"}
+	controllerKeywords := []string{"Xilinx", "amlogic", "BeagleBone", "CVITEK"}
 	c := ContainsAny(*ipLogs, controllerKeywords)
 	if c != "" {
 		controller = c
@@ -248,6 +248,10 @@ func getMinerData(
 			powerType = "APW171215a"
 		case "0x00c1":
 			powerType = "APW171215a"
+		case "0x1e08":
+			powerType = "APW171215a" // Antminer KS5
+		case "0x80000300":
+			powerType = "APW171215a" // Antminer S21
 		default:
 			powerType = hexValue
 		}
